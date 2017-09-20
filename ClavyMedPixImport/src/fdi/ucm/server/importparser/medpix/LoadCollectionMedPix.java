@@ -3,7 +3,6 @@
  */
 package fdi.ucm.server.importparser.medpix;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,10 +23,12 @@ import fdi.ucm.server.modelComplete.LoadCollection;
 import fdi.ucm.server.modelComplete.collection.CompleteCollection;
 import fdi.ucm.server.modelComplete.collection.CompleteCollectionAndLog;
 import fdi.ucm.server.modelComplete.collection.document.CompleteDocuments;
+import fdi.ucm.server.modelComplete.collection.document.CompleteLinkElement;
 import fdi.ucm.server.modelComplete.collection.document.CompleteResourceElementURL;
 import fdi.ucm.server.modelComplete.collection.document.CompleteTextElement;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteElementType;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteGrammar;
+import fdi.ucm.server.modelComplete.collection.grammar.CompleteLinkElementType;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteResourceElementType;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteTextElementType;
 
@@ -40,6 +41,10 @@ public class LoadCollectionMedPix extends LoadCollection{
 	
 	private CompleteCollection CC;
 	private ArrayList<String> Logs;
+	private CompleteLinkElementType encounterIDL;
+	private HashMap<String,CompleteDocuments> encounterID;
+	private CompleteLinkElementType encounterIDLC;
+	
 	
 	
 	/**
@@ -71,8 +76,11 @@ public class LoadCollectionMedPix extends LoadCollection{
 			CC=new CompleteCollection("MedPix", new Date()+"");
 			Salida.setCollection(CC);
 			Logs=new ArrayList<String>();
+			encounterID=new HashMap<String,CompleteDocuments>();
+			
 			
 			ProcesaCasos();
+			ProcesaCasoID();
 			//AQUI se puede trabajar
 			
 			
@@ -84,9 +92,23 @@ public class LoadCollectionMedPix extends LoadCollection{
 		
 	}
 
+	private void ProcesaCasoID() {
+		CompleteGrammar CG=new CompleteGrammar("CasosCompleto", "CasosCompleto", CC);
+		CC.getMetamodelGrammar().add(CG);
+		
+		HashMap<String,CompleteElementType> tabla= ProcesaGramaticaCasoID(CG);
+		
+	}
+
+
+
+	
+
+
+
 	private void ProcesaCasos() {
 
-		CompleteGrammar CG=new CompleteGrammar("cases", "cases", CC);
+		CompleteGrammar CG=new CompleteGrammar("CasosSimple", "CasosSimple", CC);
 		CC.getMetamodelGrammar().add(CG);
 		
 		HashMap<String,CompleteElementType> tabla= ProcesaGramaticaCasos(CG);
@@ -128,6 +150,11 @@ public class LoadCollectionMedPix extends LoadCollection{
       						if (entryTabla.getKey().equals("history"))
       							cd.setDescriptionText(Valor);
       						
+      						if (entryTabla.getKey().equals("encounterID"))
+      							{
+      							encounterID.put(Valor, cd);
+      							}
+      						
       					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
       					{
       						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
@@ -164,9 +191,17 @@ public class LoadCollectionMedPix extends LoadCollection{
 	private HashMap<String, CompleteElementType> ProcesaGramaticaCasos(CompleteGrammar cG) {
 		HashMap<String, CompleteElementType> Salida=new HashMap<String, CompleteElementType>();
 		
-		CompleteTextElementType encounterID=new CompleteTextElementType("encounterID", cG);
+		CompleteElementType encounterID=new CompleteElementType("encounterID", cG);
 		cG.getSons().add(encounterID);
-		Salida.put("encounterID", encounterID);
+
+		
+		CompleteTextElementType encounterIDT=new CompleteTextElementType("encounterID", encounterID, cG);
+		encounterID.getSons().add(encounterIDT);
+		Salida.put("encounterID", encounterIDT);
+		
+		encounterIDL=new CompleteLinkElementType("encounterID", encounterID, cG);
+		encounterID.getSons().add(encounterIDL);
+
 		
 		CompleteTextElementType imageID=new CompleteTextElementType("imageID", cG);
 		cG.getSons().add(imageID);
@@ -207,7 +242,62 @@ public class LoadCollectionMedPix extends LoadCollection{
 		return Salida;
 	}
 
+	private HashMap<String, CompleteElementType> ProcesaGramaticaCasoID(CompleteGrammar cG) {
+		HashMap<String, CompleteElementType> Salida=new HashMap<String, CompleteElementType>();
+		
+		CompleteElementType encounterID=new CompleteElementType("encounterID", cG);
+		cG.getSons().add(encounterID);
 
+		
+		CompleteTextElementType encounterIDT=new CompleteTextElementType("encounterID", encounterID, cG);
+		encounterID.getSons().add(encounterIDT);
+		Salida.put("encounterID", encounterIDT);
+		
+		encounterIDLC=new CompleteLinkElementType("encounterID", encounterID, cG);
+		encounterID.getSons().add(encounterIDLC);
+
+		
+		CompleteTextElementType dxHow=new CompleteTextElementType("dxHow", cG);
+		cG.getSons().add(dxHow);
+		Salida.put("dxHow", dxHow);
+		
+		CompleteTextElementType age=new CompleteTextElementType("age", cG);
+		cG.getSons().add(age);
+		Salida.put("age", age);
+		
+		CompleteTextElementType sex=new CompleteTextElementType("sex", cG);
+		cG.getSons().add(sex);
+		Salida.put("sex", sex);
+		
+		CompleteTextElementType diagnosis=new CompleteTextElementType("diagnosis", cG);
+		cG.getSons().add(diagnosis);
+		Salida.put("diagnosis", diagnosis);
+		
+		CompleteTextElementType exam=new CompleteTextElementType("exam", cG);
+		cG.getSons().add(exam);
+		Salida.put("exam", exam);
+		
+		CompleteTextElementType authorID=new CompleteTextElementType("authorID", cG);
+		cG.getSons().add(authorID);
+		Salida.put("authorID", authorID);
+		
+		CompleteTextElementType authorName=new CompleteTextElementType("authorName", cG);
+		cG.getSons().add(authorName);
+		Salida.put("authorName", authorName);
+		
+		CompleteTextElementType authorAffiliation=new CompleteTextElementType("authorAffiliation", cG);
+		cG.getSons().add(authorAffiliation);
+		Salida.put("authorAffiliation", authorAffiliation);
+		
+		CompleteResourceElementType authorImage=new CompleteResourceElementType("authorImage", cG);
+		cG.getSons().add(authorImage);
+		Salida.put("authorImage", authorImage);
+		
+		
+		///authorEmail
+		
+		return Salida;
+	}
 
 	@Override
 	public ArrayList<ImportExportPair> getConfiguracion() {
