@@ -47,7 +47,8 @@ public class LoadCollectionMedPix extends LoadCollection{
 	private HashMap<String,CompleteDocuments> encounterID;
 	private CompleteLinkElementType encounterIDLC;
 	private CompleteLinkElementType topicIDTC;
-	
+	public static boolean consoleDebug=false;
+	private int querryMax=2000;
 	
 	
 	/**
@@ -55,6 +56,10 @@ public class LoadCollectionMedPix extends LoadCollection{
 	 */
 	public static void main(String[] args) {
 		LoadCollectionMedPix LC=new LoadCollectionMedPix();
+		LoadCollectionMedPix.consoleDebug=true;
+		
+		
+		
 		CompleteCollectionAndLog Salida=LC.processCollecccion(new ArrayList<String>());
 		if (Salida!=null)
 			{
@@ -184,6 +189,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      						
 	      					}
 	      					else
+	      						if (consoleDebug)
 	      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla.getKey() );
 						
 	      				}
@@ -258,6 +264,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      		      					
 	      		      					
 	      		      					}else
+	      		      					if (consoleDebug)
 	      		      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos (imagenes) para parametro "+entryTabla.getKey() );
 
 	      			      				
@@ -269,7 +276,8 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      			      		  }
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							if (consoleDebug)
+								e.printStackTrace();
 							Logs.add("Error con la carga imagenes del documento->encounterID: "+IDvalues);
 						}
 	
@@ -310,7 +318,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	private void ProcesaValores(HashMap<String, CompleteElementType> tabla) {
 		
         try {
-        	URL F=new URL("https://medpix.nlm.nih.gov/rest/caseofweek/list?count=2000");
+        	URL F=new URL("https://medpix.nlm.nih.gov/rest/caseofweek/list?count="+querryMax);
        	 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       	  DocumentBuilder db = dbf.newDocumentBuilder();
       	  Document doc = db.parse(F.openStream());
@@ -369,6 +377,7 @@ public class LoadCollectionMedPix extends LoadCollection{
       						
       					}
       					else
+      						if (consoleDebug)
       						System.out.println("Lista de Casos (encounterID: "+encounterIDS+"): Error por falta de datos en casos para parametro "+entryTabla.getKey() );
 					}
       				
@@ -379,6 +388,7 @@ public class LoadCollectionMedPix extends LoadCollection{
          	  }
        	  
 		} catch (Exception e) {
+			if (consoleDebug)
 			e.printStackTrace();
 			Logs.add("Error con la carga de listas de documento");
 //			throw new RuntimeException("No tiene editor o los elementos son incorrectos");
@@ -562,7 +572,14 @@ public class LoadCollectionMedPix extends LoadCollection{
 		cG.getSons().add(imageList.getElement());
 		
 		ListImageEncounter.add(imageList);
+			
+		CompleteTextElementType error=new CompleteTextElementType("error", cG);
+		cG.getSons().add(error);
+		Salida.put("error", error);
 		
+		CompleteTextElementType contributorsCSV=new CompleteTextElementType("contributorsCSV", cG);
+		cG.getSons().add(contributorsCSV);
+		Salida.put("contributorsCSV", contributorsCSV);
 		
 		CompleteTextElementType affiliation=new CompleteTextElementType("affiliation", cG);
 		cG.getSons().add(affiliation);
@@ -575,6 +592,10 @@ public class LoadCollectionMedPix extends LoadCollection{
 		CompleteResourceElementType affiliationLogo=new CompleteResourceElementType("affiliationLogo", cG);
 		cG.getSons().add(affiliationLogo);
 		Salida.put("affiliationLogo", affiliationLogo);
+		
+		CompleteResourceElementType mediaList=new CompleteResourceElementType("mediaList", cG);
+		cG.getSons().add(mediaList);
+		Salida.put("mediaList", mediaList);
 		
 		return Salida;
 	}

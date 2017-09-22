@@ -45,6 +45,12 @@ public class CompleteElementTypeencounterIDImage {
 		if (TablaClassOf.get("imageID")!=null)
 			imageID.setClassOfIterator(TablaClassOf.get("imageID"));
 		
+		CompleteTextElementType tmpImageID=new CompleteTextElementType("tmpImageID",Element, CG);
+		Element.getSons().add(tmpImageID);
+		TablaHijos.put("tmpImageID", tmpImageID);
+		if (TablaClassOf.get("tmpImageID")!=null)
+			tmpImageID.setClassOfIterator(TablaClassOf.get("tmpImageID"));
+		
 		CompleteTextElementType imageCaption=new CompleteTextElementType("imageCaption",Element, CG);
 		Element.getSons().add(imageCaption);
 		TablaHijos.put("imageCaption", imageCaption);
@@ -111,17 +117,71 @@ public class CompleteElementTypeencounterIDImage {
 		if (TablaClassOf.get("authorID")!=null)
 			authorID.setClassOfIterator(TablaClassOf.get("authorID"));
 		
+		CompleteTextElementType authorName=new CompleteTextElementType("authorName",Element, CG);
+		Element.getSons().add(authorName);
+		TablaHijos.put("authorName", authorName);
+		if (TablaClassOf.get("authorName")!=null)
+			authorName.setClassOfIterator(TablaClassOf.get("authorName"));
+		
+		CompleteTextElementType authorAffiliation=new CompleteTextElementType("authorAffiliation",Element, CG);
+		Element.getSons().add(authorAffiliation);
+		TablaHijos.put("authorAffiliation", authorAffiliation);
+		if (TablaClassOf.get("authorAffiliation")!=null)
+			authorAffiliation.setClassOfIterator(TablaClassOf.get("authorAffiliation"));
+		
+		CompleteTextElementType authorImage=new CompleteTextElementType("authorImage",Element, CG);
+		Element.getSons().add(authorImage);
+		TablaHijos.put("authorImage", authorImage);
+		if (TablaClassOf.get("authorImage")!=null)
+			authorImage.setClassOfIterator(TablaClassOf.get("authorImage"));
+		
+		CompleteTextElementType authorEmail=new CompleteTextElementType("authorEmail",Element, CG);
+		Element.getSons().add(authorEmail);
+		TablaHijos.put("authorEmail", authorEmail);
+		if (TablaClassOf.get("authorEmail")!=null)
+			authorEmail.setClassOfIterator(TablaClassOf.get("authorEmail"));
+		
 		CompleteTextElementType approverID=new CompleteTextElementType("approverID",Element, CG);
 		Element.getSons().add(approverID);
 		TablaHijos.put("approverID", approverID);
 		if (TablaClassOf.get("approverID")!=null)
 			approverID.setClassOfIterator(TablaClassOf.get("approverID"));
 		
+		CompleteTextElementType approverEmail=new CompleteTextElementType("approverEmail",Element, CG);
+		Element.getSons().add(approverEmail);
+		TablaHijos.put("approverEmail", approverEmail);
+		if (TablaClassOf.get("approverEmail")!=null)
+			approverEmail.setClassOfIterator(TablaClassOf.get("approverEmail"));
+		
+		CompleteTextElementType approverName=new CompleteTextElementType("approverName",Element, CG);
+		Element.getSons().add(approverName);
+		TablaHijos.put("approverName", approverName);
+		if (TablaClassOf.get("approverName")!=null)
+			approverName.setClassOfIterator(TablaClassOf.get("approverName"));
+		
+		CompleteTextElementType approverAffiliation=new CompleteTextElementType("approverAffiliation",Element, CG);
+		Element.getSons().add(approverAffiliation);
+		TablaHijos.put("approverAffiliation", approverAffiliation);
+		if (TablaClassOf.get("approverAffiliation")!=null)
+			approverAffiliation.setClassOfIterator(TablaClassOf.get("approverAffiliation"));
+		
+		CompleteResourceElementType approverImage=new CompleteResourceElementType("approverImage",Element, CG);
+		Element.getSons().add(approverImage);
+		TablaHijos.put("approverImage", approverImage);
+		if (TablaClassOf.get("approverImage")!=null)
+			approverImage.setClassOfIterator(TablaClassOf.get("approverImage"));
+		
 		CompleteTextElementType figurePart=new CompleteTextElementType("figurePart",Element, CG);
 		Element.getSons().add(figurePart);
 		TablaHijos.put("figurePart", figurePart);
 		if (TablaClassOf.get("figurePart")!=null)
 			figurePart.setClassOfIterator(TablaClassOf.get("figurePart"));
+		
+		CompleteTextElementType error=new CompleteTextElementType("error",Element, CG);
+		Element.getSons().add(error);
+		TablaHijos.put("error", error);
+		if (TablaClassOf.get("error")!=null)
+			error.setClassOfIterator(TablaClassOf.get("error"));
 		
 		CompleteTextElementType size=new CompleteTextElementType("size",Element, CG);
 		Element.getSons().add(size);
@@ -146,6 +206,18 @@ public class CompleteElementTypeencounterIDImage {
 		TablaHijos.put("deleted", deleted);
 		if (TablaClassOf.get("deleted")!=null)
 			deleted.setClassOfIterator(TablaClassOf.get("deleted"));
+		
+		CompleteTextElementType encounter=new CompleteTextElementType("encounter",Element, CG);
+		Element.getSons().add(encounter);
+		TablaHijos.put("encounter", encounter);
+		if (TablaClassOf.get("encounter")!=null)
+			encounter.setClassOfIterator(TablaClassOf.get("encounter"));
+		
+		CompleteTextElementType topic=new CompleteTextElementType("topic",Element, CG);
+		Element.getSons().add(topic);
+		TablaHijos.put("topic", topic);
+		if (TablaClassOf.get("topic")!=null)
+			topic.setClassOfIterator(TablaClassOf.get("topic"));
 		
 		CompleteTextElementType added=new CompleteTextElementType("added",Element, CG);
 		Element.getSons().add(added);
