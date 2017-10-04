@@ -49,6 +49,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	private CompleteLinkElementType topicIDTC;
 	public static boolean consoleDebug=false;
 	private int querryMax=2000;
+	private CompleteLinkElementType topicIDIDLC;
 	
 	
 	/**
@@ -95,6 +96,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 			
 			ProcesaCasos();
 			ProcesaCasoID();
+			ProcesaTopics();
 			//AQUI se puede trabajar
 			
 			
@@ -105,6 +107,17 @@ public class LoadCollectionMedPix extends LoadCollection{
 		}
 		
 	}
+
+	private void ProcesaTopics() {
+		CompleteGrammar CG=new CompleteGrammar("Topics", "Topics", CC);
+		CC.getMetamodelGrammar().add(CG);
+		
+		HashMap<String,CompleteElementType> tabla= ProcesaGramaticaTopics(CG);
+//		ProcesaValoresCasoID(tabla);
+		
+	}
+
+
 
 	private void ProcesaCasoID() {
 		CompleteGrammar CG=new CompleteGrammar("CasosCompleto", "CasosCompleto", CC);
@@ -453,6 +466,159 @@ public class LoadCollectionMedPix extends LoadCollection{
 		return Salida;
 	}
 
+	private HashMap<String, CompleteElementType> ProcesaGramaticaTopics(CompleteGrammar cG) {
+		HashMap<String, CompleteElementType> Salida=new HashMap<String, CompleteElementType>();
+		
+		CompleteElementType topicID=new CompleteElementType("topicID", cG);
+		cG.getSons().add(topicID);
+
+		
+		CompleteTextElementType topicIDT=new CompleteTextElementType("topicID", topicID, cG);
+		topicID.getSons().add(topicIDT);
+		Salida.put("topicID", topicIDT);
+		
+		topicIDIDLC=new CompleteLinkElementType("topicID", topicID, cG);
+		topicID.getSons().add(topicIDIDLC);
+
+		
+		CompleteTextElementType factoid=new CompleteTextElementType("factoid", cG);
+		cG.getSons().add(factoid);
+		Salida.put("factoid", factoid);
+		
+		CompleteTextElementType preacr=new CompleteTextElementType("preacr", cG);
+		cG.getSons().add(preacr);
+		Salida.put("preacr", preacr);
+		
+		CompleteTextElementType postacr=new CompleteTextElementType("postacr", cG);
+		cG.getSons().add(postacr);
+		Salida.put("age", postacr);
+		
+		CompleteTextElementType acrCode=new CompleteTextElementType("acrCode", cG);
+		cG.getSons().add(acrCode);
+		Salida.put("sex", acrCode);
+		
+		CompleteTextElementType reference=new CompleteTextElementType("reference", cG);
+		cG.getSons().add(reference);
+		Salida.put("reference", reference);
+		
+		CompleteTextElementType location=new CompleteTextElementType("location", cG);
+		cG.getSons().add(location);
+		Salida.put("location", location);
+		
+		CompleteTextElementType subLocation=new CompleteTextElementType("subLocation", cG);
+		cG.getSons().add(subLocation);
+		Salida.put("subLocation", subLocation);
+		
+		CompleteTextElementType categoryID=new CompleteTextElementType("categoryID", cG);
+		cG.getSons().add(categoryID);
+		Salida.put("categoryID", categoryID);
+		
+		CompleteTextElementType subCategory=new CompleteTextElementType("subCategory", cG);
+		cG.getSons().add(subCategory);
+		Salida.put("subCategory", subCategory);
+		
+		CompleteTextElementType subCategoryID=new CompleteTextElementType("subCategoryID", cG);
+		cG.getSons().add(subCategoryID);
+		Salida.put("subCategoryID", subCategoryID);
+		
+		CompleteResourceElementType author=new CompleteResourceElementType("author", cG);
+		cG.getSons().add(author);
+		Salida.put("author", author);
+				
+		CompleteResourceElementType submitName=new CompleteResourceElementType("submitName", cG);
+		cG.getSons().add(submitName);
+		Salida.put("submitName", submitName);
+		
+		
+		//AQUI ME QUEDE ABURRIENDOME
+		
+		
+		CompleteTextElementType approverID=new CompleteTextElementType("approverID", cG);
+		cG.getSons().add(approverID);
+		Salida.put("approverID", approverID);
+		
+		CompleteResourceElementType approverEmail=new CompleteResourceElementType("approverEmail", cG);
+		cG.getSons().add(approverEmail);
+		Salida.put("approverEmail", approverEmail);
+		
+		CompleteTextElementType approverName=new CompleteTextElementType("approverName", cG);
+		cG.getSons().add(approverName);
+		Salida.put("approverName", approverName);
+		
+		CompleteTextElementType approverAffiliation=new CompleteTextElementType("approverAffiliation", cG);
+		cG.getSons().add(approverAffiliation);
+		Salida.put("approverAffiliation", approverAffiliation);
+		
+		CompleteResourceElementType approverImage=new CompleteResourceElementType("approverImage", cG);
+		cG.getSons().add(approverImage);
+		Salida.put("approverImage", approverImage);
+		
+		CompleteTextElementType findings=new CompleteTextElementType("findings", cG);
+		cG.getSons().add(findings);
+		Salida.put("findings", findings);
+		
+		CompleteTextElementType ddx=new CompleteTextElementType("ddx", cG);
+		cG.getSons().add(ddx);
+		Salida.put("ddx", ddx);
+		
+		CompleteTextElementType txFollowup=new CompleteTextElementType("txFollowup", cG);
+		cG.getSons().add(txFollowup);
+		Salida.put("txFollowup", txFollowup);
+		
+		CompleteTextElementType discussion=new CompleteTextElementType("discussion", cG);
+		cG.getSons().add(discussion);
+		Salida.put("discussion", discussion);
+		
+		
+		CompleteElementType topicID=new CompleteElementType("topicID", cG);
+		cG.getSons().add(topicID);
+
+		
+		CompleteTextElementType topicIDT=new CompleteTextElementType("topicIDT", topicID, cG);
+		encounterID.getSons().add(topicIDT);
+		Salida.put("topicID", topicIDT);
+		
+		topicIDTC=new CompleteLinkElementType("topicIDT", topicID, cG);
+		encounterID.getSons().add(topicIDTC);
+	
+		CompleteTextElementType mCaseID=new CompleteTextElementType("mCaseID", cG);
+		cG.getSons().add(mCaseID);
+		Salida.put("mCaseID", mCaseID);
+		
+		CompleteElementTypeencounterIDImage imageList=new CompleteElementTypeencounterIDImage("imageList", cG);
+		cG.getSons().add(imageList.getElement());
+		
+		ListImageEncounter.add(imageList);
+			
+		CompleteTextElementType error=new CompleteTextElementType("error", cG);
+		cG.getSons().add(error);
+		Salida.put("error", error);
+		
+		CompleteTextElementType contributorsCSV=new CompleteTextElementType("contributorsCSV", cG);
+		cG.getSons().add(contributorsCSV);
+		Salida.put("contributorsCSV", contributorsCSV);
+		
+		CompleteTextElementType affiliation=new CompleteTextElementType("affiliation", cG);
+		cG.getSons().add(affiliation);
+		Salida.put("affiliation", affiliation);
+		
+		CompleteTextElementType affiliationID=new CompleteTextElementType("affiliationID", cG);
+		cG.getSons().add(affiliationID);
+		Salida.put("affiliationID", affiliationID);
+		
+		CompleteResourceElementType affiliationLogo=new CompleteResourceElementType("affiliationLogo", cG);
+		cG.getSons().add(affiliationLogo);
+		Salida.put("affiliationLogo", affiliationLogo);
+		
+		CompleteResourceElementType mediaList=new CompleteResourceElementType("mediaList", cG);
+		cG.getSons().add(mediaList);
+		Salida.put("mediaList", mediaList);
+		
+		return Salida;
+	}
+	
+	
+	
 	private HashMap<String, CompleteElementType> ProcesaGramaticaCasoID(CompleteGrammar cG) {
 		HashMap<String, CompleteElementType> Salida=new HashMap<String, CompleteElementType>();
 		
