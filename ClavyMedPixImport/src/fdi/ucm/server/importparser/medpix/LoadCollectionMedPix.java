@@ -179,7 +179,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      							{
 	      							
 	      							
-	      							while (ListTopicID.size()<=IDDoc.size())
+	      							while (ListTopicID.size()<IDDoc.size())
       			      			  	{
       			      				CompleteElementTypetopicIDTC cona = ListTopicID.get(0);
       			      			CompleteElementTypetopicIDTC nuevo = new CompleteElementTypetopicIDTC(cona);
@@ -209,6 +209,11 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      							
 	      							
 	      							for (int j = 0; j < IDDoc.size(); j++) {
+	      								
+	      								if (j>0&&consoleDebug)
+	      									System.out.println(IDDoc.size());
+	      									
+	      								
 										CompleteDocuments completeDocuments=IDDoc.get(j);
 										
 	      								CompleteLinkElement CLEC=new CompleteLinkElement(topicIDIDLC, cd);
@@ -264,6 +269,36 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      				
 	      				try {
 	      					NodeList ListaImagenes=((Element) eElement.getElementsByTagName("imageList").item(0)).getElementsByTagName("imageList");
+	      					
+	      					while (ListImageEncounterTopics.size()<ListaImagenes.getLength())
+			      			  	{
+			      				CompleteElementTypeencounterIDImage cona = ListImageEncounterTopics.get(0);
+			      				CompleteElementTypeencounterIDImage nuevo = new CompleteElementTypeencounterIDImage(cona);
+			      				ArrayList<CompleteElementType> nueva=new ArrayList<>();
+			      				
+			      				
+			      				boolean found=false;
+			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
+			      					
+			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
+			      						found=true;
+			      					else if (completeElementType.getClassOfIterator()!=null&&completeElementType.getClassOfIterator().equals(cona.getElement()))
+			      						found=true;
+								else
+									if (found)
+										nueva.add(nuevo.getElement());
+								
+								nueva.add(completeElementType);
+								
+							}
+			      				
+			      				cona.getElement().getCollectionFather().setSons(nueva);
+			      				
+			      			ListImageEncounterTopics.add(nuevo);
+			      				
+			      			  	}
+	      					
+	      					
 	      					for (int i = 0; i < ListaImagenes.getLength(); i++) {
 	      						 Node imagenNode = ListaImagenes.item(i);
 	      			      		  if (imagenNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -271,33 +306,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      			      			Element imagenNodeElem = (Element) imagenNode;
 	      			      			  if (imagenNodeElem!=null)
 	      			      			  {
-	      			      			  while (ListImageEncounterTopics.size()<=i)
-	      			      			  	{
-	      			      				CompleteElementTypeencounterIDImage cona = ListImageEncounterTopics.get(0);
-	      			      				CompleteElementTypeencounterIDImage nuevo = new CompleteElementTypeencounterIDImage(cona);
-	      			      				ArrayList<CompleteElementType> nueva=new ArrayList<>();
-	      			      				
-	      			      				
-	      			      				boolean found=false;
-	      			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
-	      			      					
-	      			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
-	      			      						found=true;
-	      			      					else if (completeElementType.getClassOfIterator()!=null&&completeElementType.getClassOfIterator().equals(cona.getElement()))
-	      			      						found=true;
-											else
-												if (found)
-													nueva.add(nuevo.getElement());
-											
-											nueva.add(completeElementType);
-											
-										}
-	      			      				
-	      			      				cona.getElement().getCollectionFather().setSons(nueva);
-	      			      				
-	      			      			ListImageEncounterTopics.add(nuevo);
-	      			      				
-	      			      			  	}
+	      			      			  
 	      			      			  
 	      			      			  CompleteElementTypeencounterIDImage ImageMio = ListImageEncounterTopics.get(i);
 	      			      			  
@@ -440,7 +449,9 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      						List<CompleteDocuments> Lista=topicID.get(Valor);
 	      						if (Lista==null)
 	      							Lista=new ArrayList<CompleteDocuments>();
-	      						
+	      						else
+	      							if (consoleDebug)
+	      								System.out.println("mas elementos para el valor->"+Valor);
 	      						Lista.add(cd);
 	      						
   		      					topicID.put(Valor, Lista);
