@@ -40,16 +40,19 @@ import fdi.ucm.server.modelComplete.collection.grammar.CompleteTextElementType;
 public class LoadCollectionMedPix extends LoadCollection{
 
 	
+	private List<CompleteElementTypeencounterIDImage> ListImageEncounterTopics;
 	private List<CompleteElementTypeencounterIDImage> ListImageEncounter;
 	private CompleteCollection CC;
 	private ArrayList<String> Logs;
 	private CompleteLinkElementType encounterIDL;
 	private HashMap<String,CompleteDocuments> encounterID;
+	private HashMap<String, CompleteDocuments> topicID;
 	private CompleteLinkElementType encounterIDLC;
 	private CompleteLinkElementType topicIDTC;
 	public static boolean consoleDebug=false;
 	private int querryMax=2000;
 	private CompleteLinkElementType topicIDIDLC;
+	
 	
 	
 	/**
@@ -92,7 +95,9 @@ public class LoadCollectionMedPix extends LoadCollection{
 			Logs=new ArrayList<String>();
 			Salida.setLogLines(Logs);
 			encounterID=new HashMap<String,CompleteDocuments>();
+			topicID=new HashMap<String,CompleteDocuments>();
 			ListImageEncounter=new ArrayList<CompleteElementTypeencounterIDImage>();
+			ListImageEncounterTopics=new ArrayList<CompleteElementTypeencounterIDImage>();
 			
 			ProcesaCasos();
 			ProcesaCasoID();
@@ -113,8 +118,185 @@ public class LoadCollectionMedPix extends LoadCollection{
 		CC.getMetamodelGrammar().add(CG);
 		
 		HashMap<String,CompleteElementType> tabla= ProcesaGramaticaTopics(CG);
-//		ProcesaValoresCasoID(tabla);
+		ProcesaValoresTopics(tabla);
 		
+	}
+
+
+
+	private void ProcesaValoresTopics(HashMap<String, CompleteElementType> tabla) {
+		for (Entry<String, CompleteDocuments> Entryvalues : topicID.entrySet()) {
+			String IDvalues=Entryvalues.getKey();
+			CompleteDocuments IDDoc=Entryvalues.getValue();
+			try {
+	        	URL F=new URL("https://medpix.nlm.nih.gov/rest/topic?topicID="+IDvalues);
+	       	 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	      	  DocumentBuilder db = dbf.newDocumentBuilder();
+	      	  Document doc = db.parse(F.openStream());
+	      	  doc.getDocumentElement().normalize();
+	      	     	
+	      	  
+	      	
+	      	  
+	      	  NodeList nodeLstT = doc.getElementsByTagName("TopicRest");
+	      		  Node fstNode = doc.getElementsByTagName("TopicRest").item(0);
+	      		  if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+	      			  {
+	      				Element eElement = (Element) fstNode;
+	      				
+	      				CompleteDocuments cd=new CompleteDocuments(CC, "", "");
+	    				CC.getEstructuras().add(cd);
+	      				
+	      				
+	      				for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
+	      					String Valor = eElement.getElementsByTagName(entryTabla.getKey()).item(0).getTextContent();
+	      					if (Valor!=null&&!Valor.isEmpty())
+	      					{
+	      					if (entryTabla.getValue() instanceof CompleteTextElementType)
+	      					{
+	      						CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType) entryTabla.getValue(), Valor);
+	      						cd.getDescription().add(TE);
+	      						TE.setDocumentsFather(cd);
+	      						
+	      						if (entryTabla.getKey().equals("factoid"))
+	      							cd.setDescriptionText(Valor);
+	      						
+	      						
+	      						
+	      						
+	      						if (entryTabla.getKey().equals("topicID"))
+	      							{
+	      							
+	      							CompleteLinkElement CLE=new CompleteLinkElement(topicIDIDLC, IDDoc);
+	      							cd.getDescription().add(CLE);
+	      							CLE.setDocumentsFather(cd);	
+	      							
+	      							CompleteLinkElement CLEC=new CompleteLinkElement(topicIDTC, cd);
+	      							IDDoc.getDescription().add(CLEC);
+	      							CLEC.setDocumentsFather(IDDoc);
+	      							
+	      							
+	      							}
+	      						
+	      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
+	      					{
+	      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
+	      						cd.getDescription().add(TE);
+	      						TE.setDocumentsFather(cd);
+	      						
+//	      						if (entryTabla.getKey().equals("imageThumbURL"))
+//	      							cd.setIcon("https://medpix.nlm.nih.gov"+Valor);
+	      						
+	      					}
+	      						
+	      						
+	      					}
+	      					else
+	      						if (consoleDebug)
+	      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla.getKey() );
+						
+	      				}
+	      				
+	      				
+	      				try {
+	      					NodeList ListaImagenes=((Element) eElement.getElementsByTagName("imageList").item(0)).getElementsByTagName("imageList");
+	      					for (int i = 0; i < ListaImagenes.getLength(); i++) {
+	      						 Node imagenNode = nodeLstT.item(i);
+	      			      		  if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+	      			      			  
+	      			      			Element imagenNodeElem = (Element) imagenNode;
+	      			      			  if (imagenNodeElem!=null)
+	      			      			  {
+	      			      			  while (ListImageEncounterTopics.size()<=i)
+	      			      			  	{
+	      			      				CompleteElementTypeencounterIDImage cona = ListImageEncounterTopics.get(0);
+	      			      				CompleteElementTypeencounterIDImage nuevo = new CompleteElementTypeencounterIDImage(cona);
+	      			      				ArrayList<CompleteElementType> nueva=new ArrayList<>();
+	      			      				
+	      			      				
+	      			      				boolean found=false;
+	      			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
+	      			      					
+	      			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
+	      			      						found=true;
+	      			      					else if (completeElementType.getClassOfIterator()!=null&&completeElementType.getClassOfIterator().equals(cona.getElement()))
+	      			      						found=true;
+											else
+												if (found)
+													nueva.add(nuevo.getElement());
+											
+											nueva.add(completeElementType);
+											
+										}
+	      			      				
+	      			      				cona.getElement().getCollectionFather().setSons(nueva);
+	      			      				
+	      			      			ListImageEncounterTopics.add(nuevo);
+	      			      				
+	      			      			  	}
+	      			      			  
+	      			      			  CompleteElementTypeencounterIDImage ImageMio = ListImageEncounterTopics.get(i);
+	      			      			  
+	      			      			for (Entry<String, CompleteElementType> entryTabla : ImageMio.getTablaHijos().entrySet()) {
+	      			      
+	      			      	
+	      		      					String Valor = imagenNodeElem.getElementsByTagName(entryTabla.getKey()).item(0).getTextContent();
+	      		      					if (Valor!=null&&!Valor.isEmpty())
+	      		      					{
+	      		      					if (entryTabla.getValue() instanceof CompleteTextElementType)
+	      		      					{
+	      		      						CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType) entryTabla.getValue(), Valor);
+	      		      						cd.getDescription().add(TE);
+	      		      						TE.setDocumentsFather(cd);
+	      		      						
+	      		      						
+	      		      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
+	      		      					{
+	      		      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
+	      		      						cd.getDescription().add(TE);
+	      		      						TE.setDocumentsFather(cd);
+	      		      						
+	      		      					if (entryTabla.getKey().equals("assignedImage")&&i==0)
+	    	      							cd.setIcon("https://medpix.nlm.nih.gov"+Valor);
+	      		      						
+	      		      						
+	      		      					}
+	      		      						
+	      		      						
+	      		      					
+	      		      					
+	      		      					}else
+	      		      					if (consoleDebug)
+	      		      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos (imagenes) para parametro "+entryTabla.getKey() );
+
+	      			      				
+	      		      					
+	      							
+	      		      				}
+	      			      			  
+	      			      		  }
+	      			      		  }
+							}
+						} catch (Exception e) {
+							if (consoleDebug)
+								e.printStackTrace();
+							Logs.add("Error con la carga imagenes del documento->encounterID: "+IDvalues);
+						}
+	
+	      				
+	      				
+	      				
+	      		  
+	      		  }
+	      	//	  ListaSer.add(fstNode.getFirstChild().getNodeValue());
+	         	  }
+	       	  
+			} catch (Exception e) {
+				e.printStackTrace();
+				Logs.add("Error con la carga de documento->encounterID: "+IDvalues);
+//				throw new RuntimeException("No tiene editor o los elementos son incorrectos");
+			}
+		}
 	}
 
 
@@ -259,7 +441,10 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      		      						cd.getDescription().add(TE);
 	      		      						TE.setDocumentsFather(cd);
 	      		      						
-
+		      		      					if (entryTabla.getKey().equals("topicID"))
+		          							{
+		      		      					topicID.put(Valor, cd);
+		          							}
 	      		      						
 	      		      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
 	      		      					{
@@ -521,29 +706,41 @@ public class LoadCollectionMedPix extends LoadCollection{
 		cG.getSons().add(subCategoryID);
 		Salida.put("subCategoryID", subCategoryID);
 		
-		CompleteResourceElementType author=new CompleteResourceElementType("author", cG);
+		CompleteTextElementType author=new CompleteTextElementType("author", cG);
 		cG.getSons().add(author);
 		Salida.put("author", author);
 				
-		CompleteResourceElementType submitName=new CompleteResourceElementType("submitName", cG);
+		CompleteTextElementType submitName=new CompleteTextElementType("submitName", cG);
 		cG.getSons().add(submitName);
 		Salida.put("submitName", submitName);
 		
+		CompleteTextElementType submitID=new CompleteTextElementType("submitID", cG);
+		cG.getSons().add(submitID);
+		Salida.put("submitID", submitID);
 		
-		//AQUI ME QUEDE ABURRIENDOME
+		CompleteTextElementType submitEmail=new CompleteTextElementType("submitEmail", cG);
+		cG.getSons().add(submitEmail);
+		Salida.put("submitEmail", submitEmail);
 		
+		CompleteTextElementType submitAffiliation=new CompleteTextElementType("submitAffiliation", cG);
+		cG.getSons().add(submitAffiliation);
+		Salida.put("submitAffiliation", submitAffiliation);
+		
+		CompleteResourceElementType submitImage=new CompleteResourceElementType("submitImage", cG);
+		cG.getSons().add(submitImage);
+		Salida.put("submitImage", submitImage);
+		
+		CompleteTextElementType approverName=new CompleteTextElementType("approverName", cG);
+		cG.getSons().add(approverName);
+		Salida.put("approverName", approverName);
 		
 		CompleteTextElementType approverID=new CompleteTextElementType("approverID", cG);
 		cG.getSons().add(approverID);
 		Salida.put("approverID", approverID);
 		
-		CompleteResourceElementType approverEmail=new CompleteResourceElementType("approverEmail", cG);
+		CompleteTextElementType approverEmail=new CompleteTextElementType("approverEmail", cG);
 		cG.getSons().add(approverEmail);
 		Salida.put("approverEmail", approverEmail);
-		
-		CompleteTextElementType approverName=new CompleteTextElementType("approverName", cG);
-		cG.getSons().add(approverName);
-		Salida.put("approverName", approverName);
 		
 		CompleteTextElementType approverAffiliation=new CompleteTextElementType("approverAffiliation", cG);
 		cG.getSons().add(approverAffiliation);
@@ -551,48 +748,45 @@ public class LoadCollectionMedPix extends LoadCollection{
 		
 		CompleteResourceElementType approverImage=new CompleteResourceElementType("approverImage", cG);
 		cG.getSons().add(approverImage);
-		Salida.put("approverImage", approverImage);
-		
-		CompleteTextElementType findings=new CompleteTextElementType("findings", cG);
-		cG.getSons().add(findings);
-		Salida.put("findings", findings);
-		
-		CompleteTextElementType ddx=new CompleteTextElementType("ddx", cG);
-		cG.getSons().add(ddx);
-		Salida.put("ddx", ddx);
-		
-		CompleteTextElementType txFollowup=new CompleteTextElementType("txFollowup", cG);
-		cG.getSons().add(txFollowup);
-		Salida.put("txFollowup", txFollowup);
-		
-		CompleteTextElementType discussion=new CompleteTextElementType("discussion", cG);
-		cG.getSons().add(discussion);
-		Salida.put("discussion", discussion);
-		
-		
-		CompleteElementType topicID=new CompleteElementType("topicID", cG);
-		cG.getSons().add(topicID);
-
-		
-		CompleteTextElementType topicIDT=new CompleteTextElementType("topicIDT", topicID, cG);
-		encounterID.getSons().add(topicIDT);
-		Salida.put("topicID", topicIDT);
-		
-		topicIDTC=new CompleteLinkElementType("topicIDT", topicID, cG);
-		encounterID.getSons().add(topicIDTC);
+		Salida.put("approverImage", approverImage);		
 	
-		CompleteTextElementType mCaseID=new CompleteTextElementType("mCaseID", cG);
-		cG.getSons().add(mCaseID);
-		Salida.put("mCaseID", mCaseID);
+		CompleteTextElementType assignedName=new CompleteTextElementType("assignedName", cG);
+		cG.getSons().add(assignedName);
+		Salida.put("assignedName", assignedName);
+		
+		CompleteTextElementType assignedAffiliation=new CompleteTextElementType("assignedAffiliation", cG);
+		cG.getSons().add(assignedAffiliation);
+		Salida.put("assignedAffiliation", assignedAffiliation);
+		
+		CompleteResourceElementType assignedImage=new CompleteResourceElementType("assignedImage", cG);
+		cG.getSons().add(assignedImage);
+		Salida.put("assignedImage", assignedImage);
+		
+		CompleteTextElementType keyword1=new CompleteTextElementType("keyword", cG);
+		cG.getSons().add(keyword1);
+		Salida.put("keyword1", keyword1);
+		
+		CompleteTextElementType keyword2=new CompleteTextElementType("keyword", cG);
+		keyword2.setClassOfIterator(keyword1);
+		cG.getSons().add(keyword2);
+		Salida.put("keyword2", keyword2);
+		
+		CompleteTextElementType keyword3=new CompleteTextElementType("keyword", cG);
+		keyword3.setClassOfIterator(keyword1);
+		cG.getSons().add(keyword3);
+		Salida.put("keyword3", keyword3);
+		
+		CompleteResourceElementType title=new CompleteResourceElementType("title", cG);
+		cG.getSons().add(title);
+		Salida.put("title", title);
+		
+		CompleteResourceElementType mediaList=new CompleteResourceElementType("mediaList", cG);
+		cG.getSons().add(mediaList);
+		Salida.put("mediaList", mediaList);
 		
 		CompleteElementTypeencounterIDImage imageList=new CompleteElementTypeencounterIDImage("imageList", cG);
-		cG.getSons().add(imageList.getElement());
-		
-		ListImageEncounter.add(imageList);
-			
-		CompleteTextElementType error=new CompleteTextElementType("error", cG);
-		cG.getSons().add(error);
-		Salida.put("error", error);
+		cG.getSons().add(imageList.getElement());		
+		ListImageEncounterTopics.add(imageList);
 		
 		CompleteTextElementType contributorsCSV=new CompleteTextElementType("contributorsCSV", cG);
 		cG.getSons().add(contributorsCSV);
@@ -609,10 +803,6 @@ public class LoadCollectionMedPix extends LoadCollection{
 		CompleteResourceElementType affiliationLogo=new CompleteResourceElementType("affiliationLogo", cG);
 		cG.getSons().add(affiliationLogo);
 		Salida.put("affiliationLogo", affiliationLogo);
-		
-		CompleteResourceElementType mediaList=new CompleteResourceElementType("mediaList", cG);
-		cG.getSons().add(mediaList);
-		Salida.put("mediaList", mediaList);
 		
 		return Salida;
 	}
