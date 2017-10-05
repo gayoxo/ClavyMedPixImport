@@ -40,15 +40,16 @@ import fdi.ucm.server.modelComplete.collection.grammar.CompleteTextElementType;
 public class LoadCollectionMedPix extends LoadCollection{
 
 	
+	private List<CompleteElementTypetopicIDTC> ListTopicID;
 	private List<CompleteElementTypeencounterIDImage> ListImageEncounterTopics;
 	private List<CompleteElementTypeencounterIDImage> ListImageEncounter;
 	private CompleteCollection CC;
 	private ArrayList<String> Logs;
 	private CompleteLinkElementType encounterIDL;
 	private HashMap<String,CompleteDocuments> encounterID;
-	private HashMap<String, CompleteDocuments> topicID;
+	private HashMap<String,List<CompleteDocuments>> topicID;
 	private CompleteLinkElementType encounterIDLC;
-	private CompleteLinkElementType topicIDTC;
+//	private CompleteLinkElementType topicIDTC;
 	public static boolean consoleDebug=false;
 	private int querryMax=2000;
 	private CompleteLinkElementType topicIDIDLC;
@@ -95,9 +96,10 @@ public class LoadCollectionMedPix extends LoadCollection{
 			Logs=new ArrayList<String>();
 			Salida.setLogLines(Logs);
 			encounterID=new HashMap<String,CompleteDocuments>();
-			topicID=new HashMap<String,CompleteDocuments>();
+			topicID=new HashMap<String,List<CompleteDocuments>>();
 			ListImageEncounter=new ArrayList<CompleteElementTypeencounterIDImage>();
 			ListImageEncounterTopics=new ArrayList<CompleteElementTypeencounterIDImage>();
+			ListTopicID=new ArrayList<CompleteElementTypetopicIDTC>();
 			
 			ProcesaCasos();
 			ProcesaCasoID();
@@ -125,9 +127,9 @@ public class LoadCollectionMedPix extends LoadCollection{
 
 
 	private void ProcesaValoresTopics(HashMap<String, CompleteElementType> tabla) {
-		for (Entry<String, CompleteDocuments> Entryvalues : topicID.entrySet()) {
+		for (Entry<String, List<CompleteDocuments>> Entryvalues : topicID.entrySet()) {
 			String IDvalues=Entryvalues.getKey();
-			CompleteDocuments IDDoc=Entryvalues.getValue();
+			List<CompleteDocuments> IDDoc=Entryvalues.getValue();
 			try {
 	        	URL F=new URL("https://medpix.nlm.nih.gov/rest/topic?topicID="+IDvalues);
 	       	 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -176,13 +178,57 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      						if (entryTabla.getKey().equals("topicID"))
 	      							{
 	      							
-	      							CompleteLinkElement CLE=new CompleteLinkElement(topicIDIDLC, IDDoc);
-	      							cd.getDescription().add(CLE);
-	      							CLE.setDocumentsFather(cd);	
 	      							
-	      							CompleteLinkElement CLEC=new CompleteLinkElement(topicIDTC, cd);
-	      							IDDoc.getDescription().add(CLEC);
-	      							CLEC.setDocumentsFather(IDDoc);
+	      							while (ListTopicID.size()<=IDDoc.size())
+      			      			  	{
+      			      				CompleteElementTypetopicIDTC cona = ListTopicID.get(0);
+      			      			CompleteElementTypetopicIDTC nuevo = new CompleteElementTypetopicIDTC(cona);
+      			      				ArrayList<CompleteElementType> nueva=new ArrayList<>();
+      			      				
+      			      				
+      			      				boolean found=false;
+      			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
+      			      					
+      			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
+      			      						found=true;
+      			      					else if (completeElementType.getClassOfIterator()!=null&&completeElementType.getClassOfIterator().equals(cona.getElement()))
+      			      						found=true;
+										else
+											if (found)
+												nueva.add(nuevo.getElement());
+										
+										nueva.add(completeElementType);
+										
+									}
+      			      				
+      			      				cona.getElement().getCollectionFather().setSons(nueva);
+//      			      				
+      			      			ListTopicID.add(nuevo);
+      			      				
+      			      			  	}
+	      							
+	      							
+	      							for (int j = 0; j < IDDoc.size(); j++) {
+										CompleteDocuments completeDocuments=IDDoc.get(j);
+										
+	      								CompleteLinkElement CLEC=new CompleteLinkElement(topicIDIDLC, cd);
+	      								completeDocuments.getDescription().add(CLEC);
+		      							CLEC.setDocumentsFather(completeDocuments);
+		      							
+		      							
+		      							
+		      							
+		      							 CompleteElementTypetopicIDTC ImageMio = ListTopicID.get(j);
+		      							
+		      							CompleteLinkElement CLE=new CompleteLinkElement(ImageMio.getElement(), completeDocuments);
+		      							cd.getDescription().add(CLE);
+		      							CLE.setDocumentsFather(cd);	
+		      							
+									}
+	      							
+	      							
+	      							
+	      							
 	      							
 	      							
 	      							}
@@ -391,7 +437,13 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      						
 	      						if (entryTabla.getKey().equals("topicID"))
       							{
-  		      					topicID.put(Valor, cd);
+	      						List<CompleteDocuments> Lista=topicID.get(Valor);
+	      						if (Lista==null)
+	      							Lista=new ArrayList<CompleteDocuments>();
+	      						
+	      						Lista.add(cd);
+	      						
+  		      					topicID.put(Valor, Lista);
       							}
 	      						
 	      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
@@ -683,9 +735,12 @@ public class LoadCollectionMedPix extends LoadCollection{
 		topicID.getSons().add(topicIDT);
 		Salida.put("topicID", topicIDT);
 		
-		topicIDIDLC=new CompleteLinkElementType("topicID", topicID, cG);
-		topicID.getSons().add(topicIDIDLC);
-
+		
+		CompleteElementTypetopicIDTC CDTIC=new CompleteElementTypetopicIDTC("topicIDT", topicID, cG);
+		topicID.getSons().add(CDTIC.getElement());
+		
+		ListTopicID.add(CDTIC);
+		
 		
 		CompleteTextElementType factoid=new CompleteTextElementType("factoid", cG);
 		cG.getSons().add(factoid);
@@ -893,7 +948,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 		cG.getSons().add(authorImage);
 		Salida.put("authorImage", authorImage);
 				
-		CompleteResourceElementType authorEmail=new CompleteResourceElementType("authorEmail", cG);
+		CompleteTextElementType authorEmail=new CompleteTextElementType("authorEmail", cG);
 		cG.getSons().add(authorEmail);
 		Salida.put("authorEmail", authorEmail);
 		
@@ -901,7 +956,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 		cG.getSons().add(approverID);
 		Salida.put("approverID", approverID);
 		
-		CompleteResourceElementType approverEmail=new CompleteResourceElementType("approverEmail", cG);
+		CompleteTextElementType approverEmail=new CompleteTextElementType("approverEmail", cG);
 		cG.getSons().add(approverEmail);
 		Salida.put("approverEmail", approverEmail);
 		
@@ -939,11 +994,12 @@ public class LoadCollectionMedPix extends LoadCollection{
 
 		
 		CompleteTextElementType topicIDT=new CompleteTextElementType("topicIDT", topicID, cG);
-		encounterID.getSons().add(topicIDT);
+		topicID.getSons().add(topicIDT);
 		Salida.put("topicID", topicIDT);
 		
-		topicIDTC=new CompleteLinkElementType("topicIDT", topicID, cG);
-		encounterID.getSons().add(topicIDTC);
+		topicIDIDLC = new CompleteLinkElementType("topicID", topicID, cG);
+		topicID.getSons().add(topicIDIDLC);
+		
 	
 		CompleteTextElementType mCaseID=new CompleteTextElementType("mCaseID", cG);
 		cG.getSons().add(mCaseID);
