@@ -140,7 +140,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      	  
 	      	
 	      	  
-	      	  NodeList nodeLstT = doc.getElementsByTagName("TopicRest");
+//	      	  NodeList nodeLstT = doc.getElementsByTagName("TopicRest");
 	      		  Node fstNode = doc.getElementsByTagName("TopicRest").item(0);
 	      		  if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
 	      			  {
@@ -265,8 +265,8 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      				try {
 	      					NodeList ListaImagenes=((Element) eElement.getElementsByTagName("imageList").item(0)).getElementsByTagName("imageList");
 	      					for (int i = 0; i < ListaImagenes.getLength(); i++) {
-	      						 Node imagenNode = nodeLstT.item(i);
-	      			      		  if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+	      						 Node imagenNode = ListaImagenes.item(i);
+	      			      		  if (imagenNode.getNodeType() == Node.ELEMENT_NODE) {
 	      			      			  
 	      			      			Element imagenNodeElem = (Element) imagenNode;
 	      			      			  if (imagenNodeElem!=null)
@@ -394,7 +394,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      	  
 	      	
 	      	  
-	      	  NodeList nodeLstT = doc.getElementsByTagName("EncounterRest");
+//	      	  NodeList nodeLstT = doc.getElementsByTagName("EncounterRest");
 	      		  Node fstNode = doc.getElementsByTagName("EncounterRest").item(0);
 	      		  if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
 	      			  {
@@ -469,8 +469,8 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      				try {
 	      					NodeList ListaImagenes=((Element) eElement.getElementsByTagName("imageList").item(0)).getElementsByTagName("imageList");
 	      					for (int i = 0; i < ListaImagenes.getLength(); i++) {
-	      						 Node imagenNode = nodeLstT.item(i);
-	      			      		  if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+	      						 Node imagenNode = ListaImagenes.item(i);
+	      			      		  if (imagenNode.getNodeType() == Node.ELEMENT_NODE) {
 	      			      			  
 	      			      			Element imagenNodeElem = (Element) imagenNode;
 	      			      			  if (imagenNodeElem!=null)
