@@ -149,7 +149,16 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      				
 	      				
 	      				for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
-	      					String Valor = eElement.getElementsByTagName(entryTabla.getKey()).item(0).getTextContent();
+	      					String Valor;
+	      					try {
+	      						Valor= eElement.getElementsByTagName(entryTabla.getKey()).item(0).getTextContent();
+							} catch (Exception e) {
+								System.err.println(F.toString());
+								System.err.println(entryTabla.getKey());
+								e.printStackTrace();
+								throw e;
+							}
+	      					 
 	      					if (Valor!=null&&!Valor.isEmpty())
 	      					{
 	      					if (entryTabla.getValue() instanceof CompleteTextElementType)
@@ -180,10 +189,19 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      						
 	      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
 	      					{
-	      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
+	      						CompleteResourceElementURL TE;
+	      						if (entryTabla.getKey().equals("url"))
+	      						{
+	      							TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), Valor);
+	      						}
+	      						else
+	      						{
+	      							TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
+	      						}
+	      						
 	      						cd.getDescription().add(TE);
 	      						TE.setDocumentsFather(cd);
-	      						
+
 //	      						if (entryTabla.getKey().equals("imageThumbURL"))
 //	      							cd.setIcon("https://medpix.nlm.nih.gov"+Valor);
 	      						
@@ -193,7 +211,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      					}
 	      					else
 	      						if (consoleDebug)
-	      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla.getKey() );
+	      						System.out.println("Topic (topicID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla.getKey() );
 						
 	      				}
 	      				
@@ -267,7 +285,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      		      					
 	      		      					}else
 	      		      					if (consoleDebug)
-	      		      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos (imagenes) para parametro "+entryTabla.getKey() );
+	      		      						System.out.println("Topic (topicID: "+IDvalues+") : Error por falta de datos (imagenes) para parametro "+entryTabla.getKey() );
 
 	      			      				
 	      		      					
@@ -280,7 +298,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 						} catch (Exception e) {
 							if (consoleDebug)
 								e.printStackTrace();
-							Logs.add("Error con la carga imagenes del documento->encounterID: "+IDvalues);
+							Logs.add("Error con la carga imagenes del documento->topicID: "+IDvalues);
 						}
 	
 	      				
@@ -370,6 +388,12 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      							
 	      							}
 	      						
+	      						
+	      						if (entryTabla.getKey().equals("topicID"))
+      							{
+  		      					topicID.put(Valor, cd);
+      							}
+	      						
 	      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
 	      					{
 	      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
@@ -441,10 +465,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      		      						cd.getDescription().add(TE);
 	      		      						TE.setDocumentsFather(cd);
 	      		      						
-		      		      					if (entryTabla.getKey().equals("topicID"))
-		          							{
-		      		      					topicID.put(Valor, cd);
-		          							}
+		      		      					
 	      		      						
 	      		      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
 	      		      					{
@@ -676,11 +697,11 @@ public class LoadCollectionMedPix extends LoadCollection{
 		
 		CompleteTextElementType postacr=new CompleteTextElementType("postacr", cG);
 		cG.getSons().add(postacr);
-		Salida.put("age", postacr);
+		Salida.put("postacr", postacr);
 		
 		CompleteTextElementType acrCode=new CompleteTextElementType("acrCode", cG);
 		cG.getSons().add(acrCode);
-		Salida.put("sex", acrCode);
+		Salida.put("acrCode", acrCode);
 		
 		CompleteTextElementType reference=new CompleteTextElementType("reference", cG);
 		cG.getSons().add(reference);
@@ -776,13 +797,17 @@ public class LoadCollectionMedPix extends LoadCollection{
 		cG.getSons().add(keyword3);
 		Salida.put("keyword3", keyword3);
 		
-		CompleteResourceElementType title=new CompleteResourceElementType("title", cG);
+		CompleteTextElementType title=new CompleteTextElementType("title", cG);
 		cG.getSons().add(title);
 		Salida.put("title", title);
 		
-		CompleteResourceElementType mediaList=new CompleteResourceElementType("mediaList", cG);
-		cG.getSons().add(mediaList);
-		Salida.put("mediaList", mediaList);
+		CompleteResourceElementType url=new CompleteResourceElementType("url", cG);
+		cG.getSons().add(url);
+		Salida.put("url", url);
+		
+		CompleteTextElementType relatedTopics=new CompleteTextElementType("relatedTopics", cG);
+		cG.getSons().add(relatedTopics);
+		Salida.put("relatedTopics", relatedTopics);
 		
 		CompleteElementTypeencounterIDImage imageList=new CompleteElementTypeencounterIDImage("imageList", cG);
 		cG.getSons().add(imageList.getElement());		
