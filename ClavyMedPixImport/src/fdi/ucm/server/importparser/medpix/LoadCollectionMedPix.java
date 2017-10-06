@@ -178,6 +178,8 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      						if (entryTabla.getKey().equals("topicID"))
 	      							{
 	      							
+	      							if (consoleDebug&&ListTopicID.size()<IDDoc.size())
+	    	      						System.out.println((ListTopicID.size()+"-"+IDDoc.size()));
 	      							
 	      							while (ListTopicID.size()<IDDoc.size())
       			      			  	{
@@ -269,6 +271,9 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      				
 	      				try {
 	      					NodeList ListaImagenes=((Element) eElement.getElementsByTagName("imageList").item(0)).getElementsByTagName("imageList");
+	      					
+	      					if (consoleDebug&&ListImageEncounterTopics.size()<ListaImagenes.getLength())
+	      						System.out.println((ListImageEncounterTopics.size()+"-"+ListaImagenes.getLength()));
 	      					
 	      					while (ListImageEncounterTopics.size()<ListaImagenes.getLength())
 			      			  	{
