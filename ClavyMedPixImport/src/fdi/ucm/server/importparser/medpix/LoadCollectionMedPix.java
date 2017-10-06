@@ -189,21 +189,31 @@ public class LoadCollectionMedPix extends LoadCollection{
       			      				
       			      				
       			      				boolean found=false;
-      			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
+      			      			boolean inserta=false;
+      			      				boolean insertado=false;
+      			      				for (CompleteElementType completeElementType : cona.getElement().getFather().getSons()) {
       			      					
       			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
       			      						found=true;
-      			      					else if (completeElementType.getClassOfIterator()!=null&&completeElementType.getClassOfIterator().equals(cona.getElement()))
-      			      						found=true;
-										else
-											if (found)
+      			      					else if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona.getElement())))
+      			      						inserta=true;
+									
+											if (inserta)
+												{
 												nueva.add(nuevo.getElement());
+												insertado=true;
+												inserta=false;
+												found=false;
+												}
 										
 										nueva.add(completeElementType);
 										
 									}
       			      				
-      			      				cona.getElement().getCollectionFather().setSons(nueva);
+      			      				if (!insertado)
+      			      					nueva.add(nuevo.getElement());
+      			      				
+      			      				cona.getElement().getFather().setSons(nueva);
 //      			      				
       			      			ListTopicID.add(nuevo);
       			      				
@@ -283,19 +293,32 @@ public class LoadCollectionMedPix extends LoadCollection{
 			      				
 			      				
 			      				boolean found=false;
+			      				boolean inserta=false;
+			      				boolean insertado=false;
 			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
 			      					
 			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
 			      						found=true;
-			      					else if (completeElementType.getClassOfIterator()!=null&&completeElementType.getClassOfIterator().equals(cona.getElement()))
-			      						found=true;
-								else
-									if (found)
-										nueva.add(nuevo.getElement());
+			      					else
+				      					if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona.getElement())))
+				      						inserta=true;
+								
+			      					
+			      					
+									if (inserta)
+									{
+									nueva.add(nuevo.getElement());
+									insertado=true;
+									inserta=false;
+									found=false;
+									}
 								
 								nueva.add(completeElementType);
 								
 							}
+			      				
+			      				if (!insertado)
+  			      					nueva.add(nuevo.getElement());
 			      				
 			      				cona.getElement().getCollectionFather().setSons(nueva);
 			      				
@@ -499,19 +522,31 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      			      				
 	      			      				
 	      			      				boolean found=false;
+	      			      			boolean insertado=false;
+	      			      		boolean inserta=false;
 	      			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
 	      			      					
 	      			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
 	      			      						found=true;
-	      			      					else if (completeElementType.getClassOfIterator()!=null&&completeElementType.getClassOfIterator().equals(cona.getElement()))
-	      			      						found=true;
-											else
-												if (found)
-													nueva.add(nuevo.getElement());
+	      			      				
+										if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona.getElement())))
+				      						inserta=true;
+	      			      				
+	      			      				
+												if (inserta)
+												{
+												nueva.add(nuevo.getElement());
+												insertado=true;
+												inserta=false;
+												found=false;
+												}
 											
 											nueva.add(completeElementType);
 											
 										}
+	      			      				
+	      			      			if (!insertado)
+	  			      					nueva.add(nuevo.getElement());
 	      			      				
 	      			      				cona.getElement().getCollectionFather().setSons(nueva);
 	      			      				
@@ -697,7 +732,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 		encounterID.getSons().add(encounterIDT);
 		Salida.put("encounterID", encounterIDT);
 		
-		encounterIDL=new CompleteLinkElementType("encounterID", encounterID, cG);
+		encounterIDL=new CompleteLinkElementType("Complete Case Definition", encounterID, cG);
 		encounterID.getSons().add(encounterIDL);
 
 		
@@ -752,7 +787,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 		Salida.put("topicID", topicIDT);
 		
 		
-		CompleteElementTypetopicIDTC CDTIC=new CompleteElementTypetopicIDTC("topicIDT", topicID, cG);
+		CompleteElementTypetopicIDTC CDTIC=new CompleteElementTypetopicIDTC("Cases", topicID, cG);
 		topicID.getSons().add(CDTIC.getElement());
 		
 		ListTopicID.add(CDTIC);
@@ -916,7 +951,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 		encounterID.getSons().add(encounterIDT);
 		Salida.put("encounterID", encounterIDT);
 		
-		encounterIDLC=new CompleteLinkElementType("encounterID", encounterID, cG);
+		encounterIDLC=new CompleteLinkElementType("Short Case Definition", encounterID, cG);
 		encounterID.getSons().add(encounterIDLC);
 
 		
