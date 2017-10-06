@@ -529,7 +529,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 	      			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
 	      			      						found=true;
 	      			      				
-										if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona.getElement())))
+	      			      					else if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona.getElement())))
 				      						inserta=true;
 	      			      				
 	      			      				
