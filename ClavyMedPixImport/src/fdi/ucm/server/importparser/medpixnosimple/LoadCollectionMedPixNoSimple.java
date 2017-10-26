@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -45,10 +46,10 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 	private List<CompleteElementTypeencounterIDImage> ListImageEncounter;
 	private CompleteCollection CC;
 	private ArrayList<String> Logs;
-	private CompleteLinkElementType encounterIDL;
-	private HashMap<String,CompleteDocuments> encounterID;
+//	private CompleteLinkElementType encounterIDL;
+	private HashSet<String> encounterID;
 	private HashMap<String,List<CompleteDocuments>> topicID;
-	private CompleteLinkElementType encounterIDLC;
+//	private CompleteLinkElementType encounterIDLC;
 //	private CompleteLinkElementType topicIDTC;
 	public static boolean consoleDebug=false;
 	private int querryMax=2000;
@@ -95,7 +96,7 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 			Salida.setCollection(CC);
 			Logs=new ArrayList<String>();
 			Salida.setLogLines(Logs);
-			encounterID=new HashMap<String,CompleteDocuments>();
+			encounterID=new  HashSet<String>();
 			topicID=new HashMap<String,List<CompleteDocuments>>();
 			ListImageEncounter=new ArrayList<CompleteElementTypeencounterIDImage>();
 			ListImageEncounterTopics=new ArrayList<CompleteElementTypeencounterIDImage>();
@@ -418,9 +419,8 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 
 	private void ProcesaValoresCasoID(HashMap<String, CompleteElementType> tabla) {
 		
-		for (Entry<String, CompleteDocuments> Entryvalues : encounterID.entrySet()) {
-			String IDvalues=Entryvalues.getKey();
-			CompleteDocuments IDDoc=Entryvalues.getValue();
+		for (String Entryvalues : encounterID) {
+			String IDvalues=Entryvalues;
 			try {
 	        	URL F=new URL("https://medpix.nlm.nih.gov/rest/encounter?encounterID="+IDvalues);
 	       	 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -457,19 +457,19 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 	      						
 	      						
 	      						
-	      						if (entryTabla.getKey().equals("encounterID"))
-	      							{
-	      							
-	      							CompleteLinkElement CLE=new CompleteLinkElement(encounterIDLC, IDDoc);
-	      							cd.getDescription().add(CLE);
-	      							CLE.setDocumentsFather(cd);	
-	      							
-	      							CompleteLinkElement CLEC=new CompleteLinkElement(encounterIDL, cd);
-	      							IDDoc.getDescription().add(CLEC);
-	      							CLEC.setDocumentsFather(IDDoc);
-	      							
-	      							
-	      							}
+//	      						if (entryTabla.getKey().equals("encounterID"))
+//	      							{
+//	      							
+//	      							CompleteLinkElement CLE=new CompleteLinkElement(encounterIDLC, IDDoc);
+//	      							cd.getDescription().add(CLE);
+//	      							CLE.setDocumentsFather(cd);	
+//	      							
+//	      							CompleteLinkElement CLEC=new CompleteLinkElement(encounterIDL, cd);
+//	      							IDDoc.getDescription().add(CLEC);
+//	      							CLEC.setDocumentsFather(IDDoc);
+//	      							
+//	      							
+//	      							}
 	      						
 	      						
 	      						if (entryTabla.getKey().equals("topicID"))
@@ -626,18 +626,14 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 
 	private void ProcesaCasos() {
 
-		CompleteGrammar CG=new CompleteGrammar("CasosSimple", "CasosSimple", null);
-		CC.getMetamodelGrammar().add(CG);
-		
-		HashMap<String,CompleteElementType> tabla= ProcesaGramaticaCasos(CG);
-		
-		ProcesaValores(tabla);
+
+		ProcesaValores();
 		
 	}
 
 
 
-	private void ProcesaValores(HashMap<String, CompleteElementType> tabla) {
+	private void ProcesaValores() {
 		
         try {
         	URL F=new URL("https://medpix.nlm.nih.gov/rest/caseofweek/list?count="+querryMax);
@@ -658,50 +654,10 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 					Logs.add("Documento sin encounterID");
 				}
       				
+
       				
-      				
-      				CompleteDocuments cd=new CompleteDocuments(CC, "", "");
-      				CC.getEstructuras().add(cd);
-      				
-      				
-      				
-      				
-      				
-      				for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
-      					String Valor = eElement.getElementsByTagName(entryTabla.getKey()).item(0).getTextContent();
-      					if (Valor!=null&&!Valor.isEmpty())
-      					{
-      					if (entryTabla.getValue() instanceof CompleteTextElementType)
-      					{
-      						CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType) entryTabla.getValue(), Valor);
-      						cd.getDescription().add(TE);
-      						TE.setDocumentsFather(cd);
-      						
-      						if (entryTabla.getKey().equals("history"))
-      							cd.setDescriptionText(Valor);
-      						
-      						if (entryTabla.getKey().equals("encounterID"))
-      							{
-      							encounterID.put(Valor, cd);
-      							}
-      						
-      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
-      					{
-      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
-      						cd.getDescription().add(TE);
-      						TE.setDocumentsFather(cd);
-      						
-      						if (entryTabla.getKey().equals("imageThumbURL"))
-      							cd.setIcon("https://medpix.nlm.nih.gov"+Valor);
-      						
-      					}
-      						
-      						
-      					}
-      					else
-      						if (consoleDebug)
-      						System.out.println("Lista de Casos (encounterID: "+encounterIDS+"): Error por falta de datos en casos para parametro "+entryTabla.getKey() );
-					}
+      			encounterID.add(encounterIDS);
+      			
       				
       				
       		  }
@@ -721,59 +677,6 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 
 
 
-	private HashMap<String, CompleteElementType> ProcesaGramaticaCasos(CompleteGrammar cG) {
-		HashMap<String, CompleteElementType> Salida=new HashMap<String, CompleteElementType>();
-		
-		CompleteElementType encounterID=new CompleteElementType("encounterID", cG);
-		cG.getSons().add(encounterID);
-
-		
-		CompleteTextElementType encounterIDT=new CompleteTextElementType("encounterID", encounterID, cG);
-		encounterID.getSons().add(encounterIDT);
-		Salida.put("encounterID", encounterIDT);
-		
-		encounterIDL=new CompleteLinkElementType("Complete Case Definition", encounterID, cG);
-		encounterID.getSons().add(encounterIDL);
-
-		
-		CompleteTextElementType imageID=new CompleteTextElementType("imageID", cG);
-		cG.getSons().add(imageID);
-		Salida.put("imageID", imageID);
-		
-		CompleteResourceElementType imageURL=new CompleteResourceElementType("imageURL", cG);
-		cG.getSons().add(imageURL);
-		Salida.put("imageURL", imageURL);
-		
-		CompleteResourceElementType imageThumbURL=new CompleteResourceElementType("imageThumbURL", cG);
-		cG.getSons().add(imageThumbURL);
-		Salida.put("imageThumbURL", imageThumbURL);
-		
-		CompleteTextElementType history=new CompleteTextElementType("history", cG);
-		cG.getSons().add(history);
-		Salida.put("history", history);
-		
-		CompleteTextElementType age=new CompleteTextElementType("age", cG);
-		cG.getSons().add(age);
-		Salida.put("age", age);
-		
-		CompleteTextElementType sex=new CompleteTextElementType("sex", cG);
-		cG.getSons().add(sex);
-		Salida.put("sex", sex);
-		
-		CompleteTextElementType quiz=new CompleteTextElementType("quiz", cG);
-		cG.getSons().add(quiz);
-		Salida.put("quiz", quiz);
-		
-		CompleteTextElementType offset=new CompleteTextElementType("offset", cG);
-		cG.getSons().add(offset);
-		Salida.put("offset", offset);
-		
-		CompleteTextElementType caseNumber=new CompleteTextElementType("caseNumber", cG);
-		cG.getSons().add(caseNumber);
-		Salida.put("caseNumber", caseNumber);
-		
-		return Salida;
-	}
 
 	private HashMap<String, CompleteElementType> ProcesaGramaticaTopics(CompleteGrammar cG) {
 		HashMap<String, CompleteElementType> Salida=new HashMap<String, CompleteElementType>();
@@ -951,8 +854,6 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 		encounterID.getSons().add(encounterIDT);
 		Salida.put("encounterID", encounterIDT);
 		
-		encounterIDLC=new CompleteLinkElementType("Short Case Definition", encounterID, cG);
-		encounterID.getSons().add(encounterIDLC);
 
 		
 		CompleteTextElementType dxHow=new CompleteTextElementType("dxHow", cG);
@@ -1096,7 +997,7 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 
 	@Override
 	public String getName() {
-		return "MedPix";
+		return "MedPix (Sin Ficha Simple)";
 	}
 
 	@Override
