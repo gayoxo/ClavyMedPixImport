@@ -1,9 +1,16 @@
 /**
  * 
  */
-package fdi.ucm.server.importparser.medpixnosimple;
+package fdi.ucm.server.importparser.medpixbytopic;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,10 +23,14 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import fdi.ucm.server.importparser.medpixnosimple.CompleteElementTypeencounterIDImage;
+import fdi.ucm.server.importparser.medpixnosimple.CompleteElementTypetopicIDTC;
 import fdi.ucm.server.modelComplete.ImportExportPair;
 import fdi.ucm.server.modelComplete.LoadCollection;
 import fdi.ucm.server.modelComplete.collection.CompleteCollection;
@@ -52,7 +63,6 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 //	private CompleteLinkElementType encounterIDLC;
 //	private CompleteLinkElementType topicIDTC;
 	public static boolean consoleDebug=false;
-	private int querryMax=2000;
 	private CompleteLinkElementType topicIDIDLC;
 	
 	
@@ -635,46 +645,52 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 
 	private void ProcesaValores() {
 		
-        try {
-        	URL F=new URL("https://medpix.nlm.nih.gov/rest/caseofweek/list?count="+querryMax);
-       	 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      	  DocumentBuilder db = dbf.newDocumentBuilder();
-      	  Document doc = db.parse(F.openStream());
-      	  doc.getDocumentElement().normalize();
-      	  NodeList nodeLstT = doc.getElementsByTagName("cases");
-      	  for (int s = 0; s < nodeLstT.getLength(); s++) {
-      		  Node fstNode = nodeLstT.item(s);
-      		  if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
-      			  {
-      				Element eElement = (Element) fstNode;
-      				String encounterIDS="nulo";
-      			try {
-      				encounterIDS = eElement.getElementsByTagName("encounterID").item(0).getTextContent();
+		char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+		
+		for (char c : alphabet) {
+			 try {
+		        	URL F=new URL("https://medpix.nlm.nih.gov/rest/encounter/diagnosis.json?diagnosis="+c);
+		        	
+		        	System.out.println(F.toString());
+		        	
+		        	 InputStream is = F.openStream();
+		        	    try {
+		        	      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+		        	      String jsonText = readAll(rd);
+//		        	      System.out.println(jsonText);
+		        	      JSONArray json = new JSONArray(jsonText);
+//		        	      System.out.println(json.toString());
+//		        	      System.out.println(json.get("encounterID"));
+		        	      for (int i = 0; i < json.length(); i++) {
+		        	    	  JSONObject JO=json.getJSONObject(i);
+		        	    	  if (JO.get("encounterID")!=null)
+		        	    		  encounterID.add(JO.get("encounterID").toString());
+						}
+		        	      
+		        	    } finally {
+		        	      is.close();
+		        	    }
+		       	  
 				} catch (Exception e) {
-					Logs.add("Documento sin encounterID");
+					if (consoleDebug)
+					e.printStackTrace();
+					Logs.add("Error con la carga de listas de documento");
+//					throw new RuntimeException("No tiene editor o los elementos son incorrectos");
 				}
-      				
-
-      				
-      			encounterID.add(encounterIDS);
-      			
-      				
-      				
-      		  }
-      		  }
-      	//	  ListaSer.add(fstNode.getFirstChild().getNodeValue());
-         	  }
-       	  
-		} catch (Exception e) {
-			if (consoleDebug)
-			e.printStackTrace();
-			Logs.add("Error con la carga de listas de documento");
-//			throw new RuntimeException("No tiene editor o los elementos son incorrectos");
 		}
-        
+		
+       
         
 	}
 
+	 private static String readAll(Reader rd) throws IOException {
+		    StringBuilder sb = new StringBuilder();
+		    int cp;
+		    while ((cp = rd.read()) != -1) {
+		      sb.append((char) cp);
+		    }
+		    return sb.toString();
+		  }
 
 
 
@@ -997,7 +1013,7 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 
 	@Override
 	public String getName() {
-		return "MedPix WeekCases (Sin Ficha Simple)";
+		return "MedPix Complete (Sin Ficha Simple)";
 	}
 
 	@Override
