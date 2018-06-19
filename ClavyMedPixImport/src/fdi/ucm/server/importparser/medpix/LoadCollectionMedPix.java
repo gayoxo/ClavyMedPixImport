@@ -1096,7 +1096,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 
 	@Override
 	public String getName() {
-		return "MedPix";
+		return "MedPix WeekCases";
 	}
 
 	@Override

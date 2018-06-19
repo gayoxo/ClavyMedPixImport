@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
@@ -418,208 +417,196 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 		CC.getMetamodelGrammar().add(CG);
 		
 		HashMap<String,CompleteElementType> tabla= ProcesaGramaticaCasoID(CG);
-		ProcesaValoresCasoID(tabla);
+		ProcesaValoresCasoIDJson(tabla);
 	}
 
 
 
 	
-
-
-
-	private void ProcesaValoresCasoID(HashMap<String, CompleteElementType> tabla) {
+private void ProcesaValoresCasoIDJson(HashMap<String, CompleteElementType> tabla) {
 		
+		System.out.println(encounterID.size());
+		int ite=1;
 		for (String Entryvalues : encounterID) {
+		
+			
+			System.out.println(ite++ + "/"+encounterID.size());
+			
 			String IDvalues=Entryvalues;
+			
+			
 			try {
-	        	URL F=new URL("https://medpix.nlm.nih.gov/rest/encounter?encounterID="+IDvalues);
-	       	 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	      	  DocumentBuilder db = dbf.newDocumentBuilder();
-	      	  Document doc = db.parse(F.openStream());
-	      	  doc.getDocumentElement().normalize();
-	      	     	
-	      	  
-	      	
-	      	  
-//	      	  NodeList nodeLstT = doc.getElementsByTagName("EncounterRest");
-	      		  Node fstNode = doc.getElementsByTagName("EncounterRest").item(0);
-	      		  if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
-	      			  {
-	      				Element eElement = (Element) fstNode;
-	      				
-	      				CompleteDocuments cd=new CompleteDocuments(CC, "", "");
-	    				CC.getEstructuras().add(cd);
-	      				
-	      				
-	      				for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
-	      					String Valor = eElement.getElementsByTagName(entryTabla.getKey()).item(0).getTextContent();
-	      					if (Valor!=null&&!Valor.isEmpty())
-	      					{
-	      					if (entryTabla.getValue() instanceof CompleteTextElementType)
-	      					{
-	      						CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType) entryTabla.getValue(), Valor);
-	      						cd.getDescription().add(TE);
-	      						TE.setDocumentsFather(cd);
-	      						
-	      						if (entryTabla.getKey().equals("history"))
-	      							cd.setDescriptionText(Valor);
-	      						
-	      						
-	      						
-	      						
-//	      						if (entryTabla.getKey().equals("encounterID"))
-//	      							{
-//	      							
-//	      							CompleteLinkElement CLE=new CompleteLinkElement(encounterIDLC, IDDoc);
-//	      							cd.getDescription().add(CLE);
-//	      							CLE.setDocumentsFather(cd);	
-//	      							
-//	      							CompleteLinkElement CLEC=new CompleteLinkElement(encounterIDL, cd);
-//	      							IDDoc.getDescription().add(CLEC);
-//	      							CLEC.setDocumentsFather(IDDoc);
-//	      							
-//	      							
-//	      							}
-	      						
-	      						
-	      						if (entryTabla.getKey().equals("topicID"))
-      							{
-	      						List<CompleteDocuments> Lista=topicID.get(Valor);
-	      						if (Lista==null)
-	      							Lista=new ArrayList<CompleteDocuments>();
-	      						else
-	      							if (consoleDebug)
-	      								System.out.println("mas elementos para el valor->"+Valor);
-	      						Lista.add(cd);
-	      						
-  		      					topicID.put(Valor, Lista);
-      							}
-	      						
-	      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
-	      					{
-	      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
-	      						cd.getDescription().add(TE);
-	      						TE.setDocumentsFather(cd);
-	      						
-//	      						if (entryTabla.getKey().equals("imageThumbURL"))
-//	      							cd.setIcon("https://medpix.nlm.nih.gov"+Valor);
-	      						
-	      					}
-	      						
-	      						
-	      					}
-	      					else
-	      						if (consoleDebug)
-	      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla.getKey() );
-						
-	      				}
-	      				
-	      				
-	      				try {
-	      					NodeList ListaImagenes=((Element) eElement.getElementsByTagName("imageList").item(0)).getElementsByTagName("imageList");
-	      					for (int i = 0; i < ListaImagenes.getLength(); i++) {
-	      						 Node imagenNode = ListaImagenes.item(i);
-	      			      		  if (imagenNode.getNodeType() == Node.ELEMENT_NODE) {
-	      			      			  
-	      			      			Element imagenNodeElem = (Element) imagenNode;
-	      			      			  if (imagenNodeElem!=null)
-	      			      			  {
-	      			      			  while (ListImageEncounter.size()<=i)
-	      			      			  	{
-	      			      				CompleteElementTypeencounterIDImage cona = ListImageEncounter.get(0);
-	      			      				CompleteElementTypeencounterIDImage nuevo = new CompleteElementTypeencounterIDImage(cona);
-	      			      				ArrayList<CompleteElementType> nueva=new ArrayList<>();
-	      			      				
-	      			      				
-	      			      				boolean found=false;
-	      			      			boolean insertado=false;
-	      			      		boolean inserta=false;
-	      			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
-	      			      					
-	      			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
-	      			      						found=true;
-	      			      				
-	      			      					else if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona.getElement())))
-				      						inserta=true;
-	      			      				
-	      			      				
-												if (inserta)
-												{
-												nueva.add(nuevo.getElement());
-												insertado=true;
-												inserta=false;
-												found=false;
-												}
-											
-											nueva.add(completeElementType);
-											
-										}
-	      			      				
-	      			      			if (!insertado)
-	  			      					nueva.add(nuevo.getElement());
-	      			      				
-	      			      				cona.getElement().getCollectionFather().setSons(nueva);
-	      			      				
-	      			      				ListImageEncounter.add(nuevo);
-	      			      				
-	      			      			  	}
-	      			      			  
-	      			      			  CompleteElementTypeencounterIDImage ImageMio = ListImageEncounter.get(i);
-	      			      			  
-	      			      			for (Entry<String, CompleteElementType> entryTabla : ImageMio.getTablaHijos().entrySet()) {
-	      			      
-	      			      	
-	      		      					String Valor = imagenNodeElem.getElementsByTagName(entryTabla.getKey()).item(0).getTextContent();
-	      		      					if (Valor!=null&&!Valor.isEmpty())
-	      		      					{
-	      		      					if (entryTabla.getValue() instanceof CompleteTextElementType)
-	      		      					{
-	      		      						CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType) entryTabla.getValue(), Valor);
-	      		      						cd.getDescription().add(TE);
-	      		      						TE.setDocumentsFather(cd);
-	      		      						
-		      		      					
-	      		      						
-	      		      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
-	      		      					{
-	      		      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
-	      		      						cd.getDescription().add(TE);
-	      		      						TE.setDocumentsFather(cd);
-	      		      						
-	      		      					if (entryTabla.getKey().equals("thumbImageURL")&&i==0)
-	    	      							cd.setIcon("https://medpix.nlm.nih.gov"+Valor);
-	      		      						
-	      		      						
-	      		      					}
-	      		      						
-	      		      						
-	      		      					
-	      		      					
-	      		      					}else
-	      		      					if (consoleDebug)
-	      		      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos (imagenes) para parametro "+entryTabla.getKey() );
+			URL F=new URL("https://medpix.nlm.nih.gov/rest/encounter.json?encounterID="+IDvalues);
+			
+			InputStream is = F.openStream();
+    	    
+    	      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+    	      String jsonText = readAll(rd);
+    	      JSONObject json = new JSONObject(jsonText);
 
-	      			      				
-	      		      					
-	      							
-	      		      				}
-	      			      			  
-	      			      		  }
-	      			      		  }
+    	      CompleteDocuments cd=new CompleteDocuments(CC, "", "");
+				CC.getEstructuras().add(cd);
+    	      
+				
+				for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
+					String Valor = json.get(entryTabla.getKey()).toString();
+					if (Valor!=null&&!Valor.isEmpty())
+					{
+						if (entryTabla.getValue() instanceof CompleteTextElementType)
+      					{
+      						CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType) entryTabla.getValue(), Valor);
+      						cd.getDescription().add(TE);
+      						TE.setDocumentsFather(cd);
+      						
+      						if (entryTabla.getKey().equals("history"))
+      							cd.setDescriptionText(Valor);
+      						
+      						
+      						
+      						
+//      						if (entryTabla.getKey().equals("encounterID"))
+//      							{
+//      							
+//      							CompleteLinkElement CLE=new CompleteLinkElement(encounterIDLC, IDDoc);
+//      							cd.getDescription().add(CLE);
+//      							CLE.setDocumentsFather(cd);	
+//      							
+//      							CompleteLinkElement CLEC=new CompleteLinkElement(encounterIDL, cd);
+//      							IDDoc.getDescription().add(CLEC);
+//      							CLEC.setDocumentsFather(IDDoc);
+//      							
+//      							
+//      							}
+      						
+      						
+      						if (entryTabla.getKey().equals("topicID"))
+  							{
+      						List<CompleteDocuments> Lista=topicID.get(Valor);
+      						if (Lista==null)
+      							Lista=new ArrayList<CompleteDocuments>();
+      						else
+      							if (consoleDebug)
+      								System.out.println("mas elementos para el valor->"+Valor);
+      						Lista.add(cd);
+      						
+		      					topicID.put(Valor, Lista);
+  							}
+      						
+      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
+      					{
+      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
+      						cd.getDescription().add(TE);
+      						TE.setDocumentsFather(cd);
+      						
+//      						if (entryTabla.getKey().equals("imageThumbURL"))
+//      							cd.setIcon("https://medpix.nlm.nih.gov"+Valor);
+      						
+      					}
+      						
+      						
+      					}
+      					else
+      						if (consoleDebug)
+      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla.getKey() );
+					
+					
+				}
+				
+				
+				JSONArray imagenes = json.getJSONArray("imageList");
+				
+				for (int i = 0; i < imagenes.length(); i++) {
+						 
+			      			  
+
+			      			  while (ListImageEncounter.size()<=i)
+			      			  	{
+			      				CompleteElementTypeencounterIDImage cona = ListImageEncounter.get(0);
+			      				CompleteElementTypeencounterIDImage nuevo = new CompleteElementTypeencounterIDImage(cona);
+			      				ArrayList<CompleteElementType> nueva=new ArrayList<>();
+			      				
+			      				
+			      				boolean found=false;
+			      			boolean insertado=false;
+			      		boolean inserta=false;
+			      				for (CompleteElementType completeElementType : cona.getElement().getCollectionFather().getSons()) {
+			      					
+			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona.getElement())
+			      						found=true;
+			      				
+			      					else if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona.getElement())))
+	      						inserta=true;
+			      				
+			      				
+									if (inserta)
+									{
+									nueva.add(nuevo.getElement());
+									insertado=true;
+									inserta=false;
+									found=false;
+									}
+								
+								nueva.add(completeElementType);
+								
 							}
-						} catch (Exception e) {
-							if (consoleDebug)
-								e.printStackTrace();
-							Logs.add("Error con la carga imagenes del documento->encounterID: "+IDvalues);
-						}
-	
-	      				
-	      				
-	      				
-	      		  
-	      		  }
-	      	//	  ListaSer.add(fstNode.getFirstChild().getNodeValue());
-	         	  }
+			      				
+			      			if (!insertado)
+		      					nueva.add(nuevo.getElement());
+			      				
+			      				cona.getElement().getCollectionFather().setSons(nueva);
+			      				
+			      				ListImageEncounter.add(nuevo);
+			      				
+			      			  	}
+			      			  
+			      			  
+			      			  
+			      			  
+			      			JSONObject imagenNode = imagenes.getJSONObject(i);
+			      			  CompleteElementTypeencounterIDImage ImageMio = ListImageEncounter.get(i);
+			      			  
+			      			for (Entry<String, CompleteElementType> entryTabla : ImageMio.getTablaHijos().entrySet()) {
+			      
+			      				String Valor = imagenNode.get(entryTabla.getKey()).toString();
+		      					if (Valor!=null&&!Valor.isEmpty())
+		      					{
+		      					if (entryTabla.getValue() instanceof CompleteTextElementType)
+		      					{
+		      						CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType) entryTabla.getValue(), Valor);
+		      						cd.getDescription().add(TE);
+		      						TE.setDocumentsFather(cd);
+		      						
+ 		      					
+		      						
+		      					}else if (entryTabla.getValue() instanceof CompleteResourceElementType)
+		      					{
+		      						CompleteResourceElementURL TE=new CompleteResourceElementURL((CompleteResourceElementType) entryTabla.getValue(), "https://medpix.nlm.nih.gov"+Valor);
+		      						cd.getDescription().add(TE);
+		      						TE.setDocumentsFather(cd);
+		      						
+		      					if (entryTabla.getKey().equals("thumbImageURL")&&i==0)
+     							cd.setIcon("https://medpix.nlm.nih.gov"+Valor);
+		      						
+		      						
+		      					}
+		      						
+		      						
+		      					
+		      					
+		      					}else
+		      					if (consoleDebug)
+		      						System.out.println("Documento (encounterID: "+IDvalues+") : Error por falta de datos (imagenes) para parametro "+entryTabla.getKey() );
+
+			      				
+			      		  }
+				}
+				
+				
+				JSONArray media = json.getJSONArray("mediaList");
+				System.out.println(media.toString());
+				
+				
+	      
 	       	  
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -631,6 +618,9 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 		
 		
 	}
+	
+
+
 
 
 
