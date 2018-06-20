@@ -452,7 +452,7 @@ private void ProcesaValoresCasoIDJson(HashMap<String, CompleteElementType> tabla
 				
 				for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
 					String Valor = json.get(entryTabla.getKey()).toString();
-					if (Valor!=null&&!Valor.isEmpty())
+					if (Valor!="null"&&!Valor.isEmpty())
 					{
 						if (entryTabla.getValue() instanceof CompleteTextElementType)
       					{
