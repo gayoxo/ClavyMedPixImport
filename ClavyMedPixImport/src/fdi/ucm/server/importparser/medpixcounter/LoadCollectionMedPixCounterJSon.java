@@ -173,7 +173,12 @@ public class LoadCollectionMedPixCounterJSon{
 		
 		HashSet<String> tabla= ProcesaGramaticaTopics();
 		
+		int Tot = topicID.entrySet().size();
+		int ite=0;
 		for (Entry<String, List<JSONObject>> Entryvalues : topicID.entrySet()) {
+			
+			System.out.println(ite++ + "/"+Tot);
+			
 			String IDvalues=Entryvalues.getKey();
 			List<JSONObject> IDDoc=Entryvalues.getValue();
 			try {
