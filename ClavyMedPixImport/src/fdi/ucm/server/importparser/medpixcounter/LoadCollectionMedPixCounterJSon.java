@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.MissingFormatArgumentException;
 import java.util.Map.Entry;
 
 import org.json.JSONArray;
@@ -178,7 +177,7 @@ public class LoadCollectionMedPixCounterJSon{
 			String IDvalues=Entryvalues.getKey();
 			List<JSONObject> IDDoc=Entryvalues.getValue();
 			try {
-	        	URL F=new URL("https://medpix.nlm.nih.gov/rest/topic?topicID="+IDvalues);
+	        	URL F=new URL("https://medpix.nlm.nih.gov/rest/topic.json?topicID="+IDvalues);
 	        	
 	        	InputStream is = F.openStream();
 	    	    
@@ -191,16 +190,10 @@ public class LoadCollectionMedPixCounterJSon{
 	      				
 	      				for (String entryTabla : tabla) {
 	      					String Valor;
-	      					try {
 	      						Valor= json.get(entryTabla).toString();
-							} catch (Exception e) {
-								System.err.println(F.toString());
-								System.err.println(entryTabla);
-								e.printStackTrace();
-								throw e;
-							}
+
 	      					 
-	      					if (Valor!=null&&!Valor.isEmpty())
+	      					if (Valor!="null")
 	      					{
 	      						if (entryTabla.startsWith("keyword"))
 	      							key.put(Valor);
@@ -314,9 +307,12 @@ private void ProcesaValoresCasoIDJson() {
 				for (String entryTabla : tabla) {
 					String Valor = json.get(entryTabla).toString();
 					
-					
+					if (Valor!="null")
+					{
 					if (entryTabla.equals("topicID"))
 						{
+						
+
 						List<JSONObject> Lista=topicID.get(Valor);
 						if (Lista==null)
 							Lista=new ArrayList<JSONObject>();
@@ -326,10 +322,13 @@ private void ProcesaValoresCasoIDJson() {
 						Lista.add(jod);
 						
       					topicID.put(Valor, Lista);
+						
+						
 						}
 					else
 					{
-					
+						
+							
 					
 					jod.put(entryTabla,Valor);
 					
@@ -338,6 +337,7 @@ private void ProcesaValoresCasoIDJson() {
 					Misal.append(Valor+"\n");
 					
 					
+					}
 					}
 				}
 				
