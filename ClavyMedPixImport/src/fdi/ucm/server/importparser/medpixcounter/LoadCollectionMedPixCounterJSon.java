@@ -140,11 +140,7 @@ public class LoadCollectionMedPixCounterJSon{
 			
 			try {
 				PrintWriter writer = new PrintWriter("OutPrettyText.txt", "UTF-8");
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				JsonParser jp = new JsonParser();
-				JsonElement je = jp.parse(Misal.toString());
-				String prettyJsonString = gson.toJson(je);
-				writer.println(prettyJsonString);
+				writer.println(Misal.toString());
 				writer.close();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -198,7 +194,7 @@ public class LoadCollectionMedPixCounterJSon{
 	      						Valor= json.get(entryTabla).toString();
 
 	      					 
-	      					if (Valor!="null")
+	      					if (Valor!="null"&&!Valor.isEmpty())
 	      					{
 	      						if (entryTabla.startsWith("keyword"))
 	      							key.put(Valor);
@@ -206,10 +202,10 @@ public class LoadCollectionMedPixCounterJSon{
 	      							add.put(entryTabla,Valor);
 	      						
 	      					}
-	      					else
-	      						if (consoleDebug)
-	      						System.out.println("Topic (topicID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla );
-						
+//	      					else
+//	      						if (consoleDebug)
+//	      						System.out.println("Topic (topicID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla );
+//						
 	      				}
 	      				
 	      				add.put("keyword", key);
@@ -312,7 +308,7 @@ private void ProcesaValoresCasoIDJson() {
 				for (String entryTabla : tabla) {
 					String Valor = json.get(entryTabla).toString();
 					
-					if (Valor!="null")
+					if (Valor!="null"&&!Valor.isEmpty())
 					{
 					if (entryTabla.equals("topicID"))
 						{
@@ -321,9 +317,9 @@ private void ProcesaValoresCasoIDJson() {
 						List<JSONObject> Lista=topicID.get(Valor);
 						if (Lista==null)
 							Lista=new ArrayList<JSONObject>();
-						else
-							if (consoleDebug)
-								System.out.println("mas elementos para el valor->"+Valor);
+//						else
+//							if (consoleDebug)
+//								System.out.println("mas elementos para el valor->"+Valor);
 						Lista.add(jod);
 						
       					topicID.put(Valor, Lista);
