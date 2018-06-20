@@ -175,11 +175,13 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 	      					{
 	      					if (entryTabla.getValue() instanceof CompleteTextElementType)
 	      					{
+	      						
+	      						
 	      						CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType) entryTabla.getValue(), Valor);
 	      						cd.getDescription().add(TE);
 	      						TE.setDocumentsFather(cd);
 	      						
-	      						if (entryTabla.getKey().equals("factoid"))
+	      						if (entryTabla.getKey().equals("title"))
 	      							cd.setDescriptionText(Valor);
 	      						
 	      						

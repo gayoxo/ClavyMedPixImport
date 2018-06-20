@@ -170,7 +170,7 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 	      						cd.getDescription().add(TE);
 	      						TE.setDocumentsFather(cd);
 	      						
-	      						if (entryTabla.getKey().equals("factoid"))
+	      						if (entryTabla.getKey().equals("title"))
 	      							cd.setDescriptionText(Valor);
 	      						
 	      						

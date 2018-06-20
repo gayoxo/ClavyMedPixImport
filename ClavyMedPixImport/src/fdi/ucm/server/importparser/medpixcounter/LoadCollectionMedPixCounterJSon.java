@@ -13,12 +13,21 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.MissingFormatArgumentException;
+import java.util.Map.Entry;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import fdi.ucm.server.modelComplete.collection.CompleteCollection;
 import fdi.ucm.server.modelComplete.collection.CompleteCollectionAndLog;
-import fdi.ucm.server.modelComplete.collection.document.CompleteDocuments;
 
 /**
  * @author Joaquin Gayoso Cabada
@@ -34,7 +43,10 @@ public class LoadCollectionMedPixCounterJSon{
 	private ArrayList<String> Logs;
 //	private CompleteLinkElementType encounterIDL;
 	private HashSet<String> encounterID;
-//	private HashMap<String,List<CompleteDocuments>> topicID;
+	private HashMap<String,List<JSONObject>> topicID;
+	private long counter;
+	private JSONArray SalidaAA;
+	private StringBuffer Misal;
 //	private CompleteLinkElementType encounterIDLC;
 //	private CompleteLinkElementType topicIDTC;
 	public static boolean consoleDebug=false;
@@ -81,13 +93,64 @@ public class LoadCollectionMedPixCounterJSon{
 			Logs=new ArrayList<String>();
 			Salida.setLogLines(Logs);
 			encounterID=new  HashSet<String>();
-//			topicID=new HashMap<String,List<CompleteDocuments>>();
+			topicID=new HashMap<String,List<JSONObject>>();
 //			ListImageEncounter=new ArrayList<CompleteElementTypeencounterIDImage>();
 //			ListImageEncounterTopics=new ArrayList<CompleteElementTypeencounterIDImage>();
 //			ListTopicID=new ArrayList<CompleteElementTypetopicIDTC>();
 			
+			counter=0L;
+			SalidaAA = new JSONArray();
+			Misal=new StringBuffer();
+			
+			
 			ProcesaCasos();
 			ProcesaCasoID();
+			
+			
+			
+			System.out.println("D->"+encounterID.size());
+			System.out.println("P->"+counter);
+			System.out.println("M->"+Math.round(counter/encounterID.size()));
+			
+			try {
+				PrintWriter writer = new PrintWriter("OutPretty.txt", "UTF-8");
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonParser jp = new JsonParser();
+				JsonElement je = jp.parse(SalidaAA.toString());
+				String prettyJsonString = gson.toJson(je);
+				writer.println(prettyJsonString);
+				writer.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			ProcesaTopics();
+			
+			try {
+				PrintWriter writer = new PrintWriter("OutPretty2.txt", "UTF-8");
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonParser jp = new JsonParser();
+				JsonElement je = jp.parse(SalidaAA.toString());
+				String prettyJsonString = gson.toJson(je);
+				writer.println(prettyJsonString);
+				writer.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			
+			try {
+				PrintWriter writer = new PrintWriter("OutPrettyText.txt", "UTF-8");
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonParser jp = new JsonParser();
+				JsonElement je = jp.parse(Misal.toString());
+				String prettyJsonString = gson.toJson(je);
+				writer.println(prettyJsonString);
+				writer.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 			
 			return Salida;
 		} catch (Exception e) {
@@ -100,12 +163,124 @@ public class LoadCollectionMedPixCounterJSon{
 
 
 
+	private void ProcesaTopics() {
 
+		ProcesaValoresTopics();
+		
+	}
+	
+	
+	private void ProcesaValoresTopics() {
+		
+		HashSet<String> tabla= ProcesaGramaticaTopics();
+		
+		for (Entry<String, List<JSONObject>> Entryvalues : topicID.entrySet()) {
+			String IDvalues=Entryvalues.getKey();
+			List<JSONObject> IDDoc=Entryvalues.getValue();
+			try {
+	        	URL F=new URL("https://medpix.nlm.nih.gov/rest/topic?topicID="+IDvalues);
+	        	
+	        	InputStream is = F.openStream();
+	    	    
+	    	      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+	    	      String jsonText = readAll(rd);
+	    	      JSONObject json = new JSONObject(jsonText);
 
+	    	      JSONObject add=new JSONObject();
+	    	      JSONArray key=new JSONArray();
+	      				
+	      				for (String entryTabla : tabla) {
+	      					String Valor;
+	      					try {
+	      						Valor= json.get(entryTabla).toString();
+							} catch (Exception e) {
+								System.err.println(F.toString());
+								System.err.println(entryTabla);
+								e.printStackTrace();
+								throw e;
+							}
+	      					 
+	      					if (Valor!=null&&!Valor.isEmpty())
+	      					{
+	      						if (entryTabla.startsWith("keyword"))
+	      							key.put(Valor);
+	      						else
+	      							add.put(entryTabla,Valor);
+	      						
+	      					}
+	      					else
+	      						if (consoleDebug)
+	      						System.out.println("Topic (topicID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla );
+						
+	      				}
+	      				
+	      				add.put("keyword", key);
+	      				
+	      				for (JSONObject jsonObject : IDDoc) 
+	      					jsonObject.put("Topic", add);
+						
+	      				
+	      		  
+
+	         	  
+	       	  
+			} catch (Exception e) {
+				e.printStackTrace();
+				Logs.add("Error con la carga de documento->encounterID: "+IDvalues);
+//				throw new RuntimeException("No tiene editor o los elementos son incorrectos");
+			}
+		}
+	}
+
+	
+	private HashSet<String> ProcesaGramaticaTopics() {
+		HashSet<String> Salida=new HashSet<String>();
+		
+//		Salida.add("topicID");
+//		Salida.add("factoid");
+//		Salida.add("preacr");
+//		Salida.add("postacr");
+//		Salida.add("acrCode");
+//		Salida.add("reference");
+		Salida.add("location");
+		Salida.add("subLocation");
+//		Salida.add("categoryID");
+		Salida.add("subCategory");
+//		Salida.add("subCategoryID");
+//		Salida.add("author");
+//		Salida.add("submitName");
+//		Salida.add("submitID");
+//		Salida.add("submitEmail");
+//		Salida.add("submitAffiliation");
+//		Salida.add("submitImage");
+//		Salida.add("approverName");
+//		Salida.add("approverID");
+//		Salida.add("approverEmail");
+//		Salida.add("approverAffiliation");
+//		Salida.add("approverImage");
+//		Salida.add("assignedName");
+//		Salida.add("assignedAffiliation");
+//		Salida.add("assignedImage");
+		Salida.add("keyword1");
+		Salida.add("keyword2");
+		Salida.add("keyword3");
+		Salida.add("title");
+//		Salida.add("url");
+//		Salida.add("relatedTopics");
+//		Salida.add("contributorsCSV");
+//		Salida.add("affiliation");
+//		Salida.add("affiliationID");
+//		Salida.add("affiliationLogo");
+		
+		return Salida;
+	}
+	
+	
 
 	private void ProcesaCasoID() {
 		
 		ProcesaValoresCasoIDJson();
+		
 	}
 
 
@@ -113,10 +288,8 @@ public class LoadCollectionMedPixCounterJSon{
 	
 private void ProcesaValoresCasoIDJson() {
 	
-	Long counter=0L;
-	JSONArray Salida = new JSONArray();
-	HashSet<String> tabla = ProcesaGramaticaCasoID();
 	
+		HashSet<String> tabla = ProcesaGramaticaCasoID();
 		int ite=1;
 		for (String Entryvalues : encounterID) {
 		
@@ -136,20 +309,40 @@ private void ProcesaValoresCasoIDJson() {
     	      String jsonText = readAll(rd);
     	      JSONObject json = new JSONObject(jsonText);
 
-    	      CompleteDocuments cd=new CompleteDocuments(CC, "", "");
-				CC.getEstructuras().add(cd);
     	      
 				
 				for (String entryTabla : tabla) {
 					String Valor = json.get(entryTabla).toString();
 					
+					
+					if (entryTabla.equals("topicID"))
+						{
+						List<JSONObject> Lista=topicID.get(Valor);
+						if (Lista==null)
+							Lista=new ArrayList<JSONObject>();
+						else
+							if (consoleDebug)
+								System.out.println("mas elementos para el valor->"+Valor);
+						Lista.add(jod);
+						
+      					topicID.put(Valor, Lista);
+						}
+					else
+					{
+					
+					
 					jod.put(entryTabla,Valor);
 					
-					counter=0L+Valor.split("\\s+|\n").length;			
+					counter=counter+Valor.split("\\s+|\n").length;			
+					
+					Misal.append(Valor+"\n");
+					
+					
+					}
 				}
 				
 				
-	      Salida.put(jod);
+				SalidaAA.put(jod);
 	       	  
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -161,20 +354,9 @@ private void ProcesaValoresCasoIDJson() {
 			
 			
 		}
+
 		
-		System.out.println("J->"+Salida.toString());
 		
-		System.out.println("D->"+encounterID.size());
-		
-		System.out.println("M->"+Math.round(counter/encounterID.size()));
-		
-		try {
-			PrintWriter writer = new PrintWriter("Out.txt", "UTF-8");
-			writer.println(Salida.toString());
-			writer.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		
 	}
 	
@@ -272,7 +454,7 @@ private void ProcesaValoresCasoIDJson() {
 		Salida.add("ddx");
 		Salida.add("txFollowup");
 		Salida.add("discussion");
-//		Salida.add("topicID");
+		Salida.add("topicID");
 		Salida.add("mCaseID");
 //		Salida.add("error");
 //		Salida.add("contributorsCSV");
