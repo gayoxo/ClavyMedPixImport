@@ -35,7 +35,9 @@ import fdi.ucm.server.modelComplete.LoadCollection;
 import fdi.ucm.server.modelComplete.collection.CompleteCollection;
 import fdi.ucm.server.modelComplete.collection.CompleteCollectionAndLog;
 import fdi.ucm.server.modelComplete.collection.document.CompleteDocuments;
+import fdi.ucm.server.modelComplete.collection.document.CompleteElement;
 import fdi.ucm.server.modelComplete.collection.document.CompleteLinkElement;
+import fdi.ucm.server.modelComplete.collection.document.CompleteResourceElement;
 import fdi.ucm.server.modelComplete.collection.document.CompleteResourceElementURL;
 import fdi.ucm.server.modelComplete.collection.document.CompleteTextElement;
 import fdi.ucm.server.modelComplete.collection.grammar.CompleteElementType;
@@ -54,16 +56,20 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 	private List<CompleteElementTypetopicIDTC> ListTopicID;
 	private List<CompleteElementTypeencounterIDImage> ListImageEncounterTopics;
 	private List<CompleteElementTypeencounterIDImage> ListImageEncounter;
+	private List<CompleteLinkElementType> ListElementTypeQuiz;
+	private List<CompleteTextElementType> ListElementTypeQuizOpt;
 	private CompleteCollection CC;
-	private ArrayList<String> Logs;
+	protected ArrayList<String> Logs;
 //	private CompleteLinkElementType encounterIDL;
-	private HashSet<String> encounterID;
+	protected HashSet<String> encounterID;
 	private HashMap<String,List<CompleteDocuments>> topicID;
 //	private CompleteLinkElementType encounterIDLC;
 //	private CompleteLinkElementType topicIDTC;
 	public static boolean consoleDebug=false;
 	private CompleteLinkElementType topicIDIDLC;
-	
+	private HashMap<String,CompleteDocuments> encounterID2Doc;
+	private CompleteTextElementType answerQ;
+	private CompleteTextElementType options;
 	
 	
 	/**
@@ -110,10 +116,14 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 			ListImageEncounter=new ArrayList<CompleteElementTypeencounterIDImage>();
 			ListImageEncounterTopics=new ArrayList<CompleteElementTypeencounterIDImage>();
 			ListTopicID=new ArrayList<CompleteElementTypetopicIDTC>();
+			encounterID2Doc=new HashMap<>();
+			ListElementTypeQuiz=new ArrayList<>();
+			ListElementTypeQuizOpt=new ArrayList<>();
 			
 			ProcesaCasos();
 			ProcesaCasoID();
 			ProcesaTopics();
+			ProcesaQuiz();
 			//AQUI se puede trabajar
 			
 			
@@ -124,6 +134,278 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 		}
 		
 	}
+
+	private void ProcesaQuiz() {
+		CompleteGrammar CG=new CompleteGrammar("Quiz", "Quiz", CC);
+		CC.getMetamodelGrammar().add(CG);
+		
+		HashMap<String,CompleteElementType> tabla= ProcesaGramaticaQuiz(CG);
+		ProcesaValoresQuiz(tabla);
+		
+	}
+
+
+
+	private void ProcesaValoresQuiz(HashMap<String, CompleteElementType> tabla) {
+		System.out.println(encounterID.size());
+		int ite=1;
+		for (String Entryvalues : encounterID) {
+		
+			
+			System.out.println(ite++ + "/"+encounterID.size());
+			
+			String IDvalues=Entryvalues;
+			
+			try {
+				URL F=new URL("https://medpix.nlm.nih.gov/rest/quiz/case.json?id="+IDvalues);
+				InputStream is = F.openStream();
+	    	    
+	    	      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+	    	      String jsonText = readAll(rd);
+	    	      JSONObject json = new JSONObject(jsonText);
+				
+	    	      JSONArray quizes = json.getJSONArray("questions");
+	    	      
+	    	      System.out.println("NumberQuiz for case"+IDvalues+">"+quizes.length());
+	    	      for (int i = 0; i < quizes.length(); i++) {
+	    	    	  
+	    	    	  
+	    	    	  while (ListElementTypeQuiz.size()<=i)
+	      			  	{
+	      				CompleteLinkElementType cona = ListElementTypeQuiz.get(0);
+	      				CompleteLinkElementType nuevo = cloneQuizType(cona);
+	      				ArrayList<CompleteElementType> nueva=new ArrayList<>();
+	      				
+	      				
+	      				boolean found=false;
+	      			boolean insertado=false;
+	      		boolean inserta=false;
+	      				for (CompleteElementType completeElementType : cona.getCollectionFather().getSons()) {
+	      					
+	      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona)
+	      						found=true;
+	      				
+	      					else if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona)))
+						inserta=true;
+	      				
+	      				
+							if (inserta)
+							{
+							nueva.add(nuevo);
+							insertado=true;
+							inserta=false;
+							found=false;
+							}
+						
+						nueva.add(completeElementType);
+						
+					}
+	      				
+	      			if (!insertado)
+    					nueva.add(nuevo);
+	      				
+	      				cona.getCollectionFather().setSons(nueva);
+	      				
+	      				ListElementTypeQuiz.add(nuevo);
+	      				
+	      			  	}
+	    	    	  
+	    	    	  
+	    	    	  
+	    	    	  
+	    	    	  JSONObject imagenNode = quizes.getJSONObject(i);
+	      			  CompleteLinkElementType QuizMio = ListElementTypeQuiz.get(i);
+	    	    	
+	      			  
+	      			 CompleteDocuments cd=new CompleteDocuments(CC, "", "");
+						CC.getEstructuras().add(cd);
+						
+						CompleteDocuments PadreCD = encounterID2Doc.get(IDvalues);
+						
+						
+						if (PadreCD!=null)
+						{
+						CompleteLinkElement QLE=new CompleteLinkElement(QuizMio, cd);
+						
+						PadreCD.getDescription().add(QLE);
+						}
+						
+						String ValorD=imagenNode.get("question").toString();
+						
+						if (ValorD!=null)
+							{
+							cd.setDescriptionText(ValorD);
+//							System.out.println(i+"->"+ValorD);
+							}
+						
+						
+						String questionID=null;
+						
+						for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
+						      
+		      				String Valor = imagenNode.get(entryTabla.getKey()).toString();
+	      					if (Valor!=null&&!Valor.isEmpty())
+	      					{
+	      						if (entryTabla.getKey()=="questionID")
+	      							questionID=Valor;
+	      						
+	      						else
+	      							if (entryTabla.getValue() instanceof CompleteTextElementType)
+	      								{
+	      								CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType)entryTabla.getValue(), Valor);
+	    								cd.getDescription().add(TE);
+	      								}
+	      							else if (entryTabla.getValue() instanceof CompleteResourceElementType)
+      								{
+	      								CompleteResourceElement TE=new CompleteResourceElementURL((CompleteResourceElementType)entryTabla.getValue(), Valor);
+    								cd.getDescription().add(TE);
+      								} 
+	      							else
+	      								{
+	      								//CASO Booleano
+	      								CompleteElement CE=new CompleteElement(entryTabla.getValue());
+	      								cd.getDescription().add(CE);
+	      								}
+	      						
+	      						
+	      					
+						}else
+	      					if (consoleDebug)
+	      						System.out.println("Quiz (encounterID: "+IDvalues+") : Error por falta de datos para parametro "+entryTabla.getKey() );
+						}
+						
+						
+						JSONArray quizesRes = imagenNode.getJSONArray("options");
+						
+						
+	
+						 for (int j = 0; j < quizesRes.length(); j++) {
+			    	    	  
+			    	    	  
+			    	    	  while (ListElementTypeQuizOpt.size()<=j)
+			      			  	{
+			      				CompleteTextElementType cona = ListElementTypeQuizOpt.get(0);
+			      				CompleteTextElementType nuevo = cloneQuizTypeOpt(cona);
+			      				ArrayList<CompleteElementType> nueva=new ArrayList<>();
+			      				
+			      				
+			      				boolean found=false;
+			      			boolean insertado=false;
+			      		boolean inserta=false;
+			      				for (CompleteElementType completeElementType : cona.getCollectionFather().getSons()) {
+			      					
+			      					if (completeElementType.getClassOfIterator()==null&&completeElementType==cona)
+			      						found=true;
+			      				
+			      					else if (found&&(completeElementType.getClassOfIterator()==null||!completeElementType.getClassOfIterator().equals(cona)))
+								inserta=true;
+			      				
+			      				
+									if (inserta)
+									{
+									nueva.add(nuevo);
+									insertado=true;
+									inserta=false;
+									found=false;
+									}
+								
+								nueva.add(completeElementType);
+								
+							}
+			      				
+			      			if (!insertado)
+		    					nueva.add(nuevo);
+			      				
+			      				cona.getCollectionFather().setSons(nueva);
+			      				
+			      				ListElementTypeQuizOpt.add(nuevo);
+			      				
+			      			  	}
+								
+								String ValorOptRes = quizesRes.get(j).toString();
+//								System.out.println("option_"+j+"->"+ValorOptRes);
+								CompleteTextElementType QuizMioOPt = ListElementTypeQuizOpt.get(j);
+								CompleteTextElement TE=new CompleteTextElement(QuizMioOPt, ValorOptRes);
+								cd.getDescription().add(TE);
+						 }
+						 
+						 
+						 if (questionID!=null)
+						 for (int k = 0; k < quizesRes.length(); k++) { 
+							 URL F2=new URL("https://medpix.nlm.nih.gov/quiz/byorgan/submit.json?questionID="+questionID+"&answer="+(k+1));
+								InputStream is2 = F2.openStream();
+					    	    
+					    	      BufferedReader rd2 = new BufferedReader(new InputStreamReader(is2, Charset.forName("UTF-8")));
+					    	      String jsonText2 = readAll(rd2);
+					    	      boolean correcto=false;
+					    	      try {
+					    	    	  correcto=Boolean.parseBoolean(jsonText2);
+								} catch (Exception e) {
+									correcto=false;
+								}
+					    	      
+					    	      if (correcto)
+					    	      	{
+					    	    	  CompleteTextElement TE=new CompleteTextElement(answerQ, Integer.toString(k));
+					    	    	  cd.getDescription().add(TE);
+//					    	    	  System.out.println("Correcto->"+k);
+					    	    	  break;
+					    	      	}
+					    	      
+						 }
+						 
+	    	      }
+	    	      
+	    	      
+	    	      
+//	    	      for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
+//						String Valor = json.get(entryTabla.getKey()).toString();
+//						if (Valor!="null"&&!Valor.isEmpty())
+//						{
+//							
+//							
+//							
+//						}
+//	    	      }
+	    	      
+				
+				
+					
+				
+				
+				
+				
+				
+				
+			} catch (Exception e) {
+				if (consoleDebug)
+					e.printStackTrace();
+				Logs.add("Error con la carga de preguntas para el documento->encounterID: "+IDvalues);
+			}
+			
+		}
+		
+	}
+
+
+
+	private CompleteLinkElementType cloneQuizType(CompleteLinkElementType cona) {
+		CompleteLinkElementType Element = new CompleteLinkElementType(cona.getName(),cona.getCollectionFather());
+		Element.setCollectionFather(cona.getCollectionFather());
+		Element.setMultivalued(true);
+		Element.setClassOfIterator(cona);
+		return Element;
+	}
+
+	private CompleteTextElementType cloneQuizTypeOpt(CompleteTextElementType cona) {
+		CompleteTextElementType Element = new CompleteTextElementType(cona.getName(),cona.getCollectionFather());
+		Element.setCollectionFather(cona.getCollectionFather());
+		Element.setMultivalued(true);
+		Element.setClassOfIterator(cona);
+		return Element;
+	}
+
+
 
 	private void ProcesaTopics() {
 		CompleteGrammar CG=new CompleteGrammar("Topics", "Topics", CC);
@@ -448,7 +730,7 @@ private void ProcesaValoresCasoIDJson(HashMap<String, CompleteElementType> tabla
 
     	      CompleteDocuments cd=new CompleteDocuments(CC, "", "");
 				CC.getEstructuras().add(cd);
-    	      
+				encounterID2Doc.put(IDvalues, cd);
 				
 				for (Entry<String, CompleteElementType> entryTabla : tabla.entrySet()) {
 					String Valor = json.get(entryTabla.getKey()).toString();
@@ -635,7 +917,7 @@ private void ProcesaValoresCasoIDJson(HashMap<String, CompleteElementType> tabla
 
 
 
-	private void ProcesaValores() {
+	protected void ProcesaValores() {
 		
 		char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 		
@@ -849,6 +1131,85 @@ private void ProcesaValoresCasoIDJson(HashMap<String, CompleteElementType> tabla
 		return Salida;
 	}
 	
+	private HashMap<String, CompleteElementType> ProcesaGramaticaQuiz(CompleteGrammar cG) {
+		HashMap<String, CompleteElementType> Salida=new HashMap<String, CompleteElementType>();
+		
+		
+		CompleteTextElementType questionIDIDT=new CompleteTextElementType("questionID", cG);
+		cG.getSons().add(questionIDIDT);
+		Salida.put("questionID", questionIDIDT);
+		
+		CompleteTextElementType question=new CompleteTextElementType("question", cG);
+		cG.getSons().add(question);
+		Salida.put("question", question);
+		
+		CompleteResourceElementType imageID=new CompleteResourceElementType("imageID", cG);
+		cG.getSons().add(imageID);
+		Salida.put("imageID", imageID);
+		
+		CompleteResourceElementType imageURL=new CompleteResourceElementType("imageURL", cG);
+		cG.getSons().add(imageURL);
+		Salida.put("imageURL", imageURL);
+		
+		CompleteResourceElementType fullImageURL=new CompleteResourceElementType("fullImageURL", cG);
+		cG.getSons().add(fullImageURL);
+		Salida.put("fullImageURL", fullImageURL);
+	
+		
+		CompleteTextElementType explanation=new CompleteTextElementType("explanation", cG);
+		cG.getSons().add(explanation);
+		Salida.put("explanation", explanation);
+		
+		CompleteTextElementType preacr=new CompleteTextElementType("preacr", cG);
+		cG.getSons().add(preacr);
+		Salida.put("preacr", preacr);
+		
+		answerQ=new CompleteTextElementType("answer", cG);
+		cG.getSons().add(answerQ);
+		
+		options=new CompleteTextElementType("options", cG);
+		cG.getSons().add(options);
+		options.setMultivalued(true);
+		ListElementTypeQuizOpt.add(options);
+//		https://medpix.nlm.nih.gov/quiz/byorgan/submit.json?questionID=34c03e35-b3d4-4817-a870-fc3106b5584e&answer=4
+		
+		
+		CompleteElementType isTrueFalse=new CompleteElementType("isTrueFalse", cG);
+		cG.getSons().add(isTrueFalse);
+		Salida.put("isTrueFalse", isTrueFalse);
+		isTrueFalse.setSelectable(true);
+		
+		CompleteElementType favorite=new CompleteElementType("favorite", cG);
+		cG.getSons().add(favorite);
+		Salida.put("favorite", favorite);
+		favorite.setSelectable(true);
+		
+		CompleteElementType approved=new CompleteElementType("approved", cG);
+		cG.getSons().add(approved);
+		Salida.put("approved", approved);
+		approved.setSelectable(true);
+		
+		
+		CompleteTextElementType encounterID=new CompleteTextElementType("encounterID", cG);
+		cG.getSons().add(encounterID);
+		Salida.put("encounterID", encounterID);
+		
+		
+		CompleteTextElementType author=new CompleteTextElementType("author", cG);
+		cG.getSons().add(author);
+		Salida.put("author", author);
+		
+		CompleteTextElementType editor=new CompleteTextElementType("editor", cG);
+		cG.getSons().add(editor);
+		Salida.put("editor", editor);
+		
+		CompleteTextElementType lastUpdated=new CompleteTextElementType("lastUpdated", cG);
+		cG.getSons().add(lastUpdated);
+		Salida.put("lastUpdated", lastUpdated);
+		
+		
+		return Salida;
+	}
 	
 	
 	private HashMap<String, CompleteElementType> ProcesaGramaticaCasoID(CompleteGrammar cG) {
@@ -993,6 +1354,12 @@ private void ProcesaValoresCasoIDJson(HashMap<String, CompleteElementType> tabla
 		CompleteResourceElementType mediaList=new CompleteResourceElementType("mediaList", cG);
 		cG.getSons().add(mediaList);
 		Salida.put("mediaList", mediaList);
+		
+		CompleteLinkElementType QuizLC = new CompleteLinkElementType("Quiz", topicID, cG);
+		topicID.getSons().add(QuizLC);
+		QuizLC.setMultivalued(true);
+		
+		ListElementTypeQuiz.add(QuizLC);
 		
 		return Salida;
 	}

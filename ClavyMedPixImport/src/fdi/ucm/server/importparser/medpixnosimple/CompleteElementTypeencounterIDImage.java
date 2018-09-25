@@ -30,7 +30,7 @@ public class CompleteElementTypeencounterIDImage {
 	public CompleteElementTypeencounterIDImage(
 			CompleteElementTypeencounterIDImage completeElementTypeencounterIDImage) {
 		Element=new CompleteElementType(completeElementTypeencounterIDImage.getElement().getName(),completeElementTypeencounterIDImage.getElement().getCollectionFather());
-		this.CG=completeElementTypeencounterIDImage.getElement().getCollectionFather();
+		Element.setCollectionFather(completeElementTypeencounterIDImage.getElement().getCollectionFather());
 		Element.setMultivalued(true);
 		Element.setClassOfIterator(completeElementTypeencounterIDImage.getElement());
 		TablaHijos=new HashMap<String, CompleteElementType>();
