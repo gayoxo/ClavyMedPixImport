@@ -166,7 +166,7 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 				
 	    	      JSONArray quizes = json.getJSONArray("questions");
 	    	      
-	    	      System.out.println("NumberQuiz for case"+IDvalues+">"+quizes.length());
+//	    	      System.out.println("NumberQuiz for case"+IDvalues+">"+quizes.length());
 	    	      for (int i = 0; i < quizes.length(); i++) {
 	    	    	  
 	    	    	  
