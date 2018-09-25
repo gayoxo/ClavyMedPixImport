@@ -249,6 +249,9 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 	      						if (entryTabla.getKey()=="questionID")
 	      							questionID=Valor;
 	      						
+	      						if (entryTabla.getKey()=="imageURL")
+	      							cd.setIcon("https://medpix.nlm.nih.gov"+ Valor);
+	      						
 	      						else
 	      							if (entryTabla.getValue() instanceof CompleteTextElementType)
 	      								{
@@ -257,7 +260,7 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 	      								}
 	      							else if (entryTabla.getValue() instanceof CompleteResourceElementType)
       								{
-	      								CompleteResourceElement TE=new CompleteResourceElementURL((CompleteResourceElementType)entryTabla.getValue(), Valor);
+	      								CompleteResourceElement TE=new CompleteResourceElementURL((CompleteResourceElementType)entryTabla.getValue(),"https://medpix.nlm.nih.gov"+ Valor);
     								cd.getDescription().add(TE);
       								} 
 	      							else
@@ -1356,7 +1359,7 @@ private void ProcesaValoresCasoIDJson(HashMap<String, CompleteElementType> tabla
 		Salida.put("mediaList", mediaList);
 		
 		CompleteLinkElementType QuizLC = new CompleteLinkElementType("Quiz", topicID, cG);
-		topicID.getSons().add(QuizLC);
+		cG.getSons().add(QuizLC);
 		QuizLC.setMultivalued(true);
 		
 		ListElementTypeQuiz.add(QuizLC);
