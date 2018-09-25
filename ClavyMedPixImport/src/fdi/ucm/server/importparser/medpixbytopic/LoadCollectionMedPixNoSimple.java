@@ -252,7 +252,7 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
 	      						if (entryTabla.getKey()=="imageURL")
 	      							cd.setIcon("https://medpix.nlm.nih.gov"+ Valor);
 	      						
-	      						else
+	      						
 	      							if (entryTabla.getValue() instanceof CompleteTextElementType)
 	      								{
 	      								CompleteTextElement TE=new CompleteTextElement((CompleteTextElementType)entryTabla.getValue(), Valor);
@@ -1156,7 +1156,7 @@ private void ProcesaValoresCasoIDJson(HashMap<String, CompleteElementType> tabla
 		cG.getSons().add(question);
 		Salida.put("question", question);
 		
-		CompleteResourceElementType imageID=new CompleteResourceElementType("imageID", cG);
+		CompleteTextElementType imageID=new CompleteTextElementType("imageID", cG);
 		cG.getSons().add(imageID);
 		Salida.put("imageID", imageID);
 		
