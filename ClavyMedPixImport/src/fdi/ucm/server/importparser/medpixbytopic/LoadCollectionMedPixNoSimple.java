@@ -265,10 +265,20 @@ public class LoadCollectionMedPixNoSimple extends LoadCollection{
       								} 
 	      							else
 	      								{
+	      								
+	      							  boolean correctoB=false;
+						    	      try {
+						    	    	  correctoB=Boolean.parseBoolean(Valor);
+									} catch (Exception e) {
+										correctoB=false;
+									}
+	      								if (correctoB)
+	      								{
 	      								//CASO Booleano
 	      								CompleteElement CE=new CompleteElement(entryTabla.getValue());
 	      								cd.getDescription().add(CE);
 	      								}
+	      							}
 	      						
 	      						
 	      					
