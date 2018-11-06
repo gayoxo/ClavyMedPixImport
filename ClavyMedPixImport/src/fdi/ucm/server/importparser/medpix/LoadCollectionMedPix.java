@@ -85,6 +85,10 @@ public class LoadCollectionMedPix extends LoadCollection{
 			}
 	}
 
+	public LoadCollectionMedPix() {
+		super();
+		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+	}
 	
 
 	@Override

@@ -26,7 +26,10 @@ public class LoadCollectionMedPixNoSimple extends fdi.ucm.server.importparser.me
 
 	private int querryMax=2000;
 
-	
+	public LoadCollectionMedPixNoSimple() {
+		super();
+		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+	}
 	
 	/**
 	 * @param args
@@ -92,7 +95,6 @@ public class LoadCollectionMedPixNoSimple extends fdi.ucm.server.importparser.me
          	  }
        	  
 		} catch (Exception e) {
-			if (consoleDebug)
 			e.printStackTrace();
 			Logs.add("Error con la carga de listas de documento");
 //			throw new RuntimeException("No tiene editor o los elementos son incorrectos");

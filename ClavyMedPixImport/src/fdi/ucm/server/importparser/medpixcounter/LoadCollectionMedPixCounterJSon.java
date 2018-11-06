@@ -82,7 +82,10 @@ public class LoadCollectionMedPixCounterJSon{
 			}
 	}
 
-	
+	public LoadCollectionMedPixCounterJSon() {
+		super();
+		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+	}
 
 	public CompleteCollectionAndLog processCollecccion(ArrayList<String> dateEntrada) {
 		try {
