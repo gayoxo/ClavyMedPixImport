@@ -407,7 +407,7 @@ public class LoadCollectionMedPix extends LoadCollection{
 
 
 	private void ProcesaCasoID() {
-		CompleteGrammar CG=new CompleteGrammar("CasosCompleto", "CasosCompleto", CC);
+		CompleteGrammar CG=new CompleteGrammar("Cases", "Cases", CC);
 		CC.getMetamodelGrammar().add(CG);
 		
 		HashMap<String,CompleteElementType> tabla= ProcesaGramaticaCasoID(CG);
