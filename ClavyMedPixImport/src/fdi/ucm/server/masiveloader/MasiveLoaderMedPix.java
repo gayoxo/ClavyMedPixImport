@@ -32,11 +32,11 @@ public class MasiveLoaderMedPix{
 
 	
 
-	private ArrayList<String> Logs;
+	protected ArrayList<String> Logs;
 
-	private HashSet<String> encounterID;
+	protected HashSet<String> encounterID;
 
-	public static boolean consoleDebug=false;
+	protected static boolean consoleDebug=false;
 
 	
 	
@@ -201,7 +201,7 @@ private void ProcesaValoresCasoIDJson(String folder) {
 
 
 
-	private void ProcesaCasos() {
+	protected void ProcesaCasos() {
 
 
 		ProcesaValores();
@@ -250,7 +250,7 @@ private void ProcesaValoresCasoIDJson(String folder) {
         
 	}
 
-	 private static String readAll(Reader rd) throws IOException {
+	 public static String readAll(Reader rd) throws IOException {
 		    StringBuilder sb = new StringBuilder();
 		    int cp;
 		    while ((cp = rd.read()) != -1) {
